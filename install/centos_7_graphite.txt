@@ -1,0 +1,76 @@
+Graphite installation in CentOS 7 virtual machine
+
+$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80 -device e1000,netdev=user.0 &
+
+Notes:
+
+1. The installation and setup of Graphite are done according to the instructions "Monitoring with Graphite by Jason Dixon", https://www.oreilly.com/library/view/monitoring-with-graphite/9781491916421/ch04.html
+2. Upgrade pip before installing Python dependencies, otherwise installation will fail (sphinx, cairocffi etc).
+3. Use "apache" system user instead of "www-data".
+
+Start the installation from the "Dependencies" section and apply below steps directly after installing dependencies.
+
+$ sudo yum install nmap
+$ sudo -E pip install --upgrade pip
+
+Enable http in firewall.
+
+$ sudo firewall-cmd --permanent --add-service=http
+$ sudo firewall-cmd --reload
+$ sudo systemctl enable --now httpd
+
+Check if Apache service works. In host browse "http://localhost:5555" and you can visit the Apache HTTP Server testing page.
+Now you can start installation.
+
+In section "Installing Django database" create database administration user
+    username=admin, password=geheim
+
+In section "Configuring Carbon" create conf files from the existing examples and edit them.
+
+$ cd /opt/graphite/conf
+$ sudo cp carbon.conf.example carbon.conf
+$ sudo vi carbon.conf
+    USER = carbon
+    LOG_CACHE_QUEUE_SORTS = False
+
+$ sudo cp storage-schemas.conf.example storage-schemas.conf
+$ sudo vi storage-schemas.conf
+    [collectd]
+    pattern = ^collectd\.
+    retentions = 10s:1w, 60s:1m
+
+    [default]
+    pattern = .*
+    retentions = 60s:1y
+
+$ sudo cp storage-aggregation.conf.example storage-aggregation.conf
+
+In section "Configuring Graphite-Web" create "local_settings.py" from the existing example and edit it.
+
+$ cd /opt/graphite/webapp/graphite
+$ sudo cp local_settings.py.example local_settings.py
+$ sudo vi local_settings.py
+
+    SECRET_KEY = '12345'
+    TIME_ZONE = 'Europe/Berlin'
+    MEMCACHE_HOSTS = ['127.0.0.1:11211']
+
+In section "Some Final Preparations" change the ownership of the SQLite database.
+
+$ sudo chown apache:apache /opt/graphite/storage/graphite.db
+
+------------------------------------------------------------------------
+Troubleshootings (/opt/graphite/storage/log/webapp/error.log)
+
+1. ImportError: Your WhiteNose configuration is incompatible with WhiteNoise v4.0
+
+$ sudo -E pip uninstall whitenoise
+$ sudo -E pip install "whitenoise<4"
+
+2. ImportError: No module named six.moves.urllib.parse
+
+$ sudo -E pip uninstall whitenoise
+
+3. DatabaseError: attempt to write a readonly database
+
+$ sudo chown apache:apache /opt/graphite/storage/graphite.db
