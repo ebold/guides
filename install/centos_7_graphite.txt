@@ -1,6 +1,6 @@
 Graphite installation in CentOS 7 virtual machine
 
-$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80 -device e1000,netdev=user.0 &
+$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80,hostfwd=tcp::2003-:2003 -device e1000,netdev=user.0 &
 
 Notes:
 
