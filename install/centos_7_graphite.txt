@@ -74,3 +74,13 @@ $ sudo -E pip uninstall whitenoise
 3. DatabaseError: attempt to write a readonly database
 
 $ sudo chown apache:apache /opt/graphite/storage/graphite.db
+
+4. Test the port forwarding (host to guest)
+
+In guest terminal:
+$ nc -l -p 2003
+
+In host terminal:
+$ echo hello | nc -w 5 -v localhost 2003
+
+If the port forwarding works, then "hello" message must appear in the guest terminal.
