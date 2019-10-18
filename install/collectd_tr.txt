@@ -1,0 +1,83 @@
+1. Install collectd in a timing receiver (SCU3)
+
+Note: This is an attempt to test how collectd can be used to get system metrics from timing receivers.
+
+The linux system of GSI timing receivers do no provide the yum installer.
+Hence, collectd will be installed from its RPM package, which is downloaded in a CentOS 7 guest system.
+From the guest system the RPM package is copied to a target timing receiver.
+
+Start the guest system
+
+$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80,hostfwd=tcp::2003-:2003,hostfwd=tcp::3000-:3000 -device e1000,netdev=user.0 &
+
+1.1. In the CentOS 7 guest system
+
+Download and copy a RPM package
+
+$ yumdownloader --destdir=/tmp collectd
+
+Copy the downloaded RPM package to the host system
+
+$ scp /tmp/collectd-5.8.1-1.el7.x86_64.rpm <root_user>@<target_tr_ip_address>:.
+
+Login to the target timing receiver
+
+$ ssh <root_user>@<target_tr_ip_address>
+
+1.2. In the target timing receiver
+
+Install the collectd package
+
+$ rpm -i collectd-5.8.1-1.el7.x86_64.rpm
+
+Configure to enable collectd (/etc/collectd.conf)
+
+$ vi /etc/collectd.conf
+
+    Hostname    "scu_name"
+    #FQDNLookup   true
+    BaseDir     "/var/lib/collectd"
+    PIDFile     "/var/run/collectd.pid"
+    PluginDir   "/usr/lib64/collectd"
+    TypesDB     "/usr/share/collectd/types.db"
+
+Add configuration for the Graphite plug-in (/etc/collect.d/graphite.conf)
+
+$ vi /etc/collect.d/graphite.conf
+
+    LoadPlugin write_graphite
+    <Plugin write_graphite>
+      <Node "example">
+        Host "local_host_ip_address"
+        Port "2003"
+        Protocol "tcp"
+        ReconnectInterval 0
+        LogSendErrors true
+        Prefix "collectd"
+        Postfix "collectd"
+        StoreRates true
+        AlwaysAppendDS false
+        EscapeCharacter "_"
+        SeparateInstances false
+        PreserveSeparator false
+        DropDuplicateFields false
+      </Node>
+    </Plugin>
+
+Start collectd
+
+$ /usr/sbin/collectd
+
+Now you can check the whisper database in the guest system
+
+1.3. In the guest system
+
+Check if metrics from the target timing receiver are available
+
+$ cd /opt/graphite/storage/whister/ && ls
+
+If you see something like "collectd<scu_name>collectd", then check metrics
+
+$ whisper-fetch.py collecd<scu_name>collectd/memory/memory-used.wsp | tail -2
+1571397480  18247680.000000
+1571397540  18247680.000000
