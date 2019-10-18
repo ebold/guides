@@ -2,6 +2,7 @@
 
 Note: This is an attempt to test how collectd can be used to get system metrics from timing receivers.
 pkgs.org URL for collectd RPM: https://centos.pkgs.org/7/epel-x86_64/collectd-5.8.1-1.el7.x86_64.rpm.html
+collectd write_graphite plugin: https://collectd.org/wiki/index.php/Plugin:Write_Graphite
 
 The linux system of GSI timing receivers do no provide the yum installer.
 Hence, collectd will be installed from its RPM package, which is downloaded in a CentOS 7 guest system.
