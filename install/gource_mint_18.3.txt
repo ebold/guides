@@ -1,0 +1,21 @@
+Install Gource v0.49 in Linux Mint 18.3
+
+$ tar zxvf gource-0.49.tar.gz
+$ cd  gource-0.49/
+$ sudo aptitude install libfreetype6-dev libpcre3-dev libglew-dev \
+libsdl2-dev libsdl2-image-dev libboost-filesystem-dev libglm-dev
+$ ./configure
+$ make
+$ sudo make install
+$ gource -h
+Gource v0.49
+$ which gource
+/usr/local/bin/gource
+
+Visualize the "saftlib" repo
+
+$ gource -f -s 0.1 --date-format "%B %d, %Y" --title "SAFTLib" --key saftlib
+
+Create video from visualization
+
+$ gource -f -s 0.1 --date-format "%B %d, %Y" --title "SAFTLib" --key saftlib -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -crf 1 -threads 0 -bf 0 saftlib.mp4
