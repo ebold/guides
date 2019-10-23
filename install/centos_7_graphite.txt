@@ -1,6 +1,6 @@
 Graphite installation in CentOS 7 virtual machine
 
-$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80,hostfwd=tcp::2003-:2003 -device e1000,netdev=user.0 &
+$ qemu-system-x86_64 --enable-kvm -soundhw ac97 -m 512 -hda centos_7_grafana_graphite.qcow2 -boot c -cpu host -vga std -netdev user,id=user.0,hostfwd=tcp::5555-:80,hostfwd=tcp::2003-:2003,hostfwd=udp::2003-:2003 -device e1000,netdev=user.0 &
 
 Notes:
 
@@ -19,6 +19,12 @@ $ sudo firewall-cmd --permanent --add-service=http
 $ sudo firewall-cmd --reload
 $ sudo systemctl enable --now httpd
 
+Enable the line receiver ports (TCP/UDP 2003) in firewall.
+
+$ sudo firewall-cmd --permanent --add-port=2003/tcp
+$ sudo firewall-cmd --permanent --add-port=2003/udp
+$ sudo firewall-cmd --reload
+
 Check if Apache service works. In host browse "http://localhost:5555" and you can visit the Apache HTTP Server testing page.
 Now you can start installation.
 
@@ -32,6 +38,10 @@ $ sudo cp carbon.conf.example carbon.conf
 $ sudo vi carbon.conf
     USER = carbon
     LOG_CACHE_QUEUE_SORTS = False
+
+    ENABLE_UDP_LISTENER = True
+    UDP_RECEIVE_INTERFACE = 0.0.0.0
+    UDP_RECEIVE_PORT = 2003
 
 $ sudo cp storage-schemas.conf.example storage-schemas.conf
 $ sudo vi storage-schemas.conf
