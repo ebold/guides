@@ -1,5 +1,6 @@
 Install Gource v0.49 in Linux Mint 18.3
 
+$ wget https://github.com/acaudwell/Gource/releases/download/gource-0.49/gource-0.49.tar.gz
 $ tar zxvf gource-0.49.tar.gz
 $ cd  gource-0.49/
 $ sudo aptitude install libfreetype6-dev libpcre3-dev libglew-dev \
