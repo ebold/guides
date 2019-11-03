@@ -1,0 +1,56 @@
+Using USB camera with Raspberry Pi Model B, revision 2
+
+1. Download the raspbian stretch lite image
+http://ftp.jaist.ac.jp/pub/raspberrypi/raspbian_lite/images/raspbian_lite-2019-04-09/
+wget http://ftp.jaist.ac.jp/pub/raspberrypi/raspbian_lite/images/raspbian_lite-2019-04-09/2019-04-08-raspbian-stretch-lite.zip
+wget http://ftp.jaist.ac.jp/pub/raspberrypi/raspbian_lite/images/raspbian_lite-2019-04-09/2019-04-08-raspbian-stretch-lite.sha256
+sha256sum 2019-04-08-raspbian-stretch-lite.zip
+
+2. Write the zip archive to an SD card
+unzip -p 2019-04-08-raspbian-stretch-lite.zip | sudo dd of=/dev/mmcblk0 bs=4M conv=fsync status=progress
+
+3. Boot the image, configure WLAN, enable camera and ssh
+sudo raspi-config
+- select "Network Options"->"N2 Wi-fi" for WLAN
+- select "Interfacing Options"->"P1 Camera" for camera
+- select "Interfacing Options"->"P2 SSH" for ssh
+
+4. Restart the board
+
+Next steps are done over ssh access (ssh pi@raspberrypi)
+
+5. Install the fswebcam package
+sudo apt-get install fswebcam
+
+6. Add your user to video group (unless you use the default pi user account)
+sudo usermod -a -G video <userame>
+
+7. Basic check with fswebcam (snapshooting to an image file)
+fswebcam image.jpg
+
+Now install the motioneye package
+
+8. Follow the installation steps given in https://pimylifeup.com/raspberry-pi-webcam-server/
+
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install libjpeg-dev gettext libmicrohttpd-dev libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libavdevice-dev libwebp-dev mysql-common libmariadbclient18 libpq5
+sudo wget https://github.com/Motion-Project/motion/releases/download/release-4.2.1/pi_stretch_motion_4.2.1-1_armhf.deb
+sudo dpkg -i pi_stretch_motion_4.2.1-1_armhf.deb
+
+9. Changed following settings in /etc/motion/motion.conf
+daemon on
+stream_localhost off
+picture_output off
+movie_output off
+framerate 15
+stream_maxrate 5
+
+10. Changed following settings in /etc/default/motioneye
+start_motion_daemon=yes
+
+11. Start the motion daemon
+sudo service motion restart
+
+12. See video streaming on linux PC in web browser
+raspberrypi:8081 or <rasbperry_ip_address>:8081
