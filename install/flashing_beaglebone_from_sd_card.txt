@@ -1,0 +1,35 @@
+Flashing Beaglebone Black board with Debian 9.9 (Strech LXQT)
+
+Prerequisites:
+- Linux PC (USB port, SD card slot)
+- SW tools (minicom, xz, wget, dd)
+- Beaglebone Black board, serial-to-USB cable (TTL-232R-3V3)
+- SD card (with at least 4GB capacity)
+
+1. Download SD image file with Debian 9.9 (Strech LXQT) [1].
+
+$ wget https://debian.beagleboard.org/images/bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz
+sha256sum: ff4af8aa309b7842de0759cf1f732c09a80b4ade1e89157a442f1bf93a359318
+
+2. Unzip downloaded image, write the extracted image to the SD card.
+
+$ xz -d bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz
+$ dd if=bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz of=/dev/mmcblk0 status=progress
+
+3. Connect serial-to-USB cable to PC's USB port and start minicom. Turn off the hardware flow control (Ctrl+a -> o -> f -> Esc -> Exit).
+
+$ sudo minicom -D /dev/ttyUSB0
+
+4. Put the SD card into the BBB board and power on the board. If Debian boots successfully, then log in and then power off the board.
+5. Eject the SD card and put it into PC again.
+6. Mount the SD card and modify its boot environment to allow flashing on-board eMMC:
+uncomment the line containing "init-eMMC-flasher-v3.sh" in the "/boot/uEnv.txt" file [2].
+
+6. Put the SD card into the BBB board. Power on the BBB board by holding down the S2 button.
+Once all 4 LEDs light up the "cylon" pattern (back and forth) then release the button. When flashing is completed, then 4 LEDs will be off (or on).
+
+7. Remove the SD card from the card slot and restart the board. Now the BBB board should boot Debian from its eMMC memory.
+
+Links:
+[1] https://beagleboard.org/latest-images
+[2] https://github.com/beagleboard/beaglebone-blue/wiki/Flashing-firmware
