@@ -1,0 +1,13 @@
+#. Author, Title, Edition, Year, ISBN, Location
+HDL, FPGA
+
+1. Philip Simpson, FPGA Design Best Practices for Team-based Design, 2010, 978-1441963383, ST 195 S613
+2. Peter J. Ashenden, The designer's guide to VHDL, 2. ed, 2007, 978-1558606746, ST 250 V61 A824 (2)
+3. Ricardo Jasinski, Effective coding with VHDL: principles and best practice, 2016, 978-0262034227, CERN/Amazon
+4. Pong P. Chu, FPGA Prototyping by VHDL Examples: Xilinx MicroBlaze MCS SoC, 2017, 978-1119282747, Amazon
+5. Arockia Bazil Raj, FPGA-based embedded system developer's guide, 2017, 978-1498796750, CERN/Amazon
+6. Ben Cohen, VHDL Coding Styles and Methodologies, 2013, 978-1475771886
+
+Python
+
+1. Kyran Dale, Data Visualization with Python & JavaScript, 1. ed, 2016, 978-1-491-92051-0, ST 320 D139
