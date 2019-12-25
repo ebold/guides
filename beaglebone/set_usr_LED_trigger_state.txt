@@ -1,0 +1,13 @@
+# Check settings for usr LEDs
+
+# cat /sys/class/leds/beaglebone\:green\:usr1/trigger
+none nand-disk [mmc0] mmc1 timer oneshot heartbeat backlight gpio cpu0 default-on transient flash torch
+# cat /sys/class/leds/beaglebone\:green\:usr2/trigger
+[none] nand-disk mmc0 mmc1 timer oneshot heartbeat backlight gpio cpu0 default-on transient flash torch
+# cat /sys/class/leds/beaglebone\:green\:usr3/trigger
+none nand-disk mmc0 [mmc1] timer oneshot heartbeat backlight gpio cpu0 default-on transient flash torch
+
+# Set the trigger state of LEDs (usr1, usr3) to 'none'
+
+# echo none > /sys/class/leds/beaglebone\:green\:usr1/trigger
+# echo none > /sys/class/leds/beaglebone\:green\:usr3/trigger
