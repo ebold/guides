@@ -1,0 +1,15 @@
+These are instructions used to install the open source tools
+for STMicroelectronics Stlink device
+
+Prerequisites:
+1. Beaglebone Black with debian 9.9 iot (not xlqt!)
+
+Install tools, libraries
+$ sudo apt-get update
+$ sudo apt-get install cmake
+$ sudo apt-get install libusb-1.0-0-dev
+
+Install the open source tools for STMicro Stlink
+$ git clone https://github.com/texane/stlink stlink-repo
+$ cd stlink-repo
+$ make
