@@ -13,7 +13,7 @@ sha256sum: ff4af8aa309b7842de0759cf1f732c09a80b4ade1e89157a442f1bf93a359318
 
 2. Unzip downloaded image, write the extracted image to the SD card.
 
-$ xz -d bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz
+$ xz -dk bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz
 $ dd if=bone-debian-9.9-lxqt-armhf-2019-08-03-4gb.img.xz of=/dev/mmcblk0 status=progress
 
 3. Connect serial-to-USB cable to PC's USB port and start minicom. Turn off the hardware flow control (Ctrl+a -> o -> f -> Esc -> Exit).
