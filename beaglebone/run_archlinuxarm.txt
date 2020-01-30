@@ -1,0 +1,156 @@
+Step-by-step instructions to run ArchLinuxArm and additional tools
+in Beaglebone Black.
+
+1. Create SD card with ArchLinuxArm for Beaglebone Black [1]
+
+1.1. Clear the beginning of the SD card (4GB)
+$ sudo dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=8
+
+1.2. Partition the SD card
+$ sudo fdisk /dev/mmcblk0
+
+Once the fdisk starts, delete old partitions and create a new partition:
+- delete partitions: type 'o'
+- create a new primary partition: type 'n', then 'p'
+- follow suggestion for partition number, first and last sectors: '1', '2048', default value
+- write the partition table and exit: type 'w'
+
+1.3. Create ext4 filesystem in the new partition
+
+$ sudo mkfs.ext4 /dev/mmcblk0p1
+
+1.4. Mount the filesystem of the new partition
+
+$ mkdir mnt
+$ sudo mount /dev/mmcblk0p1 mnt
+
+1.5. Download and extract the root filesystem
+
+$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-am33x-latest.tar.gz
+$ sudo bsdtar -xpf ArchLinuxARM-am33x-latest.tar.gz -C mnt
+$ sync
+
+Remark: if bsdtar returns errors given below, then update 'libarchive'
+described in [2]
+bsdtar: Ignoring malformed pax extended attribute
+bsdtar: Ignoring malformed pax extended attribute
+bsdtar: Ignoring malformed pax extended attribute
+bsdtar: Ignoring malformed pax extended attribute
+bsdtar: Error exit delayed from previous errors.
+
+1.6. Install the bootloader (U-Boot)
+
+$ sudo dd if=mnt/boot/MLO of=/dev/mmcblk0 count=1 seek=1 conv=notrunc bs=128k
+$ sudo dd if=mnt/boot/u-boot.img of=/dev/mmcblk0 count=2 seek=1 conv=notrunc bs=384k
+$ sudo umount mnt
+$ sync
+
+Now the SD card is ready to use.
+
+2. Boot from the SD card
+
+2.1. Insert the SD card into the Beaglebone Black, apply 5V supply by holding
+down the S2 switch (near the micro SD slot). The user LEDs will turn on
+if Linux boots successfully.
+
+2.2. Log in by using SSH or serial console (user=alarm, password=alarm). The
+default root password is 'root'.
+
+2.3. Initialize the pacman keyring and populate the ArchLinuxARM package
+signing keys (as root):
+$ su
+type root password
+# pacman-key --init
+# pacman-key --populate archlinuxarm
+
+2.4. Update the pacman cache (download 174MB, installation 791MB, upgrade 68MB)
+$ pacman -Syu
+
+2.5. Install additional tools (gcc, usbutils, stlink, git, python2, python2-pip, python2-pyserial)
+# pacman -S gcc usbutils stlink git python2 python2-pip python2-pyserial
+
+# su alarm
+
+3. Working with Nucleo board
+
+3.1. Connect the Nucleo board to Beaglebone Black
+
+# lsusb (should show STLink)
+# ls /dev/ttyACM0 (should show the device)
+
+3.2. Test the virtual serial connection
+
+$ stty -F /dev/ttyACM0 115200 raw -echo
+$ echo "1" > /dev/ttyACM0 (invoke 5 times)
+
+If everything works, the LED board attached to Nucleo should display "11111".
+
+4. Set time zone (Europe/Berlin)
+
+4.1. Check the current zone and list available zones
+
+$ timedatectl status
+$ timedatectl list-timezones
+
+4.2. If necessary, set the time zone (as root)
+
+$ su
+# timedatectl set-timezone Europe/Berlin
+# timedatectl status
+# su alarm
+
+5. Run user application
+
+5.1. Clone user application from github [3]
+
+$ git clone https://github.com/ebold/info_display.git
+$ cd info_display/python
+$ nohup python2 serialtest.py &
+
+Appendix
+
+A. Adding a user
+
+A.1. Add a new user, create its home directory and
+use all the defaults in terms of groups, directory names,
+shell, various other parameters:
+
+# useradd -m myuser
+# passwd myuser
+
+A.2. Adding a user to additional user groups (ie., wheel)
+
+# usermod -aG wheel myuser
+
+A.3. Run a python script on adding an USB CDC ACM device (ttyACM0)
+
+Create an udev rule and copy it into /etc/udev/rules.d directory
+As example refer to 49-stlinkv2-1.rules attached in this project.
+
+A.4. Run a python script on boot/startup
+
+systemd is used to run an user script during system boot.
+Assume user script is located in /usr/bin/myscript.py.
+Create a your service in '/etc/systemd/system/myscript.service' and
+add lines below in it:
+
+[Unit]
+Description=Serial control for Nucleo via USB
+
+[Service]
+ExecStart=python2 /usr/bin/myscript.py
+
+[Install]
+WantedBy=multi-user.target
+
+Start the service
+
+# systemctl start myscript.service
+
+In order to launch it on boot, invoke:
+
+# systemctl enable myscript.service
+
+[1] https://archlinuxarm.org/platforms/armv7/ti/beaglebone-black
+[2] https://medium.com/@jeannicolasboulay/how-to-resolve-bsdtar-ignoring-malformed-pax-extended-attribute-error-ceb75ba222e3
+[3] https://github.com/ebold/info_display
