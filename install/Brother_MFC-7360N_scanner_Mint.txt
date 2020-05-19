@@ -1,0 +1,33 @@
+These instructions are tested with the Brother MFC 7360 multifunction device
+on Linux Mint 18.3.
+
+It describes how to:
+- install the drivers and tools required for the device,
+- set up and use the chosen device as a network scanner
+
+1. Download the drivers and tools for the chosen device (Brother Support web site)
+
+- brscan4-0.4.4-3.amd64.deb
+- brscan-skey-0.2.4-1.amd64.deb
+
+2. Install the drivers and tools (use 'sudo' if required)
+
+dpkg -i --force-all <scanner_drivers>  # install drivers listed above
+dpkg -l | grep Brother                 # check installation
+
+3. Set up a scanner device to be accessed over network
+
+brsaneconfig4 -a name=<dev_name> model=<model> ip=<x.x.x.x> # add a scanner device accessible over network
+brsaneconfig4 -d                       # diagnose network scanner
+
+e.g.,
+
+brsaneconfig4 -a name=myscanner model=MFC-7360N ip=192.168.100.100
+
+4. Using the scanner device
+
+With the brscan-skey tool one can scan directly from the scanner device. Prior
+to that brscan-skey must be already launched.
+
+brscan-skey        # launch the tool
+brscan-skey -l     # check if the tool detect your scanner device
