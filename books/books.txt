@@ -11,3 +11,9 @@ HDL, FPGA
 Python
 
 1. Kyran Dale, Data Visualization with Python & JavaScript, 1. ed, 2016, 978-1-491-92051-0, ST 320 D139
+
+C/C++
+
+1. Andrew Koenig, C Traps and Pitfalls, 1989, 0-201-17928-8
+2. Andrew Koenig, Barbara E. Moo, Accelerated C++: practical programming by example, 2000, 0-201-70353-X
+3. Christopher Kormanyos, Real-Time C++ Efficient Object-Oriented and Template Microcontroller Programming, 2. ed, 2015, 978-3-662-47809-7, ST 250 C01 K84
