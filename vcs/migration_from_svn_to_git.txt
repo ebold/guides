@@ -1,0 +1,129 @@
+The guide below is used to migrate Timing Subversion repositories to Git.
+Attention: After migration stop using Subversion altogether.
+
+Requires:
+- svn-git
+
+1. Install required packages
+
+$ sudo add-apt-repository ppa:git-core/ppa # add PPA that provides the latest stable upstream Git version
+$ sudo apt update
+$ sudo apt install git                     # install or upgrade existing git
+$ sudo apt install svn-git                 # install svn-git
+
+2. Store Subversion authors (username) to their Git counterparts (username and email)
+
+$ export SVN_URL=https://my.svn.repo
+$ svn log -q $SVN_URL | awk -F '|' '/^r/ {sub("^ ", "", $2); sub(" $", "", $2); print $2" = "$2" <"$2">"}' | sort -u > authors.txt
+
+Edit authors.txt by replacing each line
+
+  username = username <username>
+
+with this:
+
+ username = Firstname Lastname <username@example.com>
+
+3. Clone Subversion repository to a local Git repository
+
+$ export GIT_CLONE=my_git_clone
+$ git svn clone $SVN_URL --no-metadata -A authors.txt --stdlayout $GIT_CLONE   # one can still push to remote Subversion repo
+
+4. Create new Git repo from a sub-directory (repeat it for each sub-directory)
+
+$ git clone $GIT_CLONE work
+$ cd work
+$ git filter-branch --subdirectory-filter <path/to/directory> HEAD    # eg., path/to/directory = configuration/network/atd/
+$ cd ..
+$ git clone work <directory>   # get rid of orphaned objects, eg., directory = atd
+$ rm -rf work
+$ cd <directory>
+$ git remote rm origin                # remove origin
+$ git clean -d -x -n                  # remove any changes but dry-run
+$ git clean -df
+
+5. Add a remote upstream (remote origin in ACC Git server) and push to upstream
+
+$ git remote add origin <Git_URL>     # eg., Git_URL = https://my.git.repo/atd.git
+$ git push -u origin master
+
+Special case: combining two Git repos into a single repo (GMT scripts)
+
+In Subversion both bash and python scripts are kept in separate directories:
+- https://my.svn.repo/trunk/monitoring/bin/
+- https://my.svn.repo/trunk/monitoring/cgi-bin/
+
+From both directories create two Git repos, add one repo into second repo as branch, rebase and merge it.
+
+6.1. Create two Git repos by repeating steps in 4. Assume 'bin' and 'cgi-bin' repos are created this way.
+
+Create new empty repo to merge a subtree
+
+$ mkdir gmt && cd gmt
+$ git init
+$ touch .gitignore
+$ git add .gitignore && git commit -m "initial commit"        # first commit before merging a subtree
+
+8.2. Add existing repo as a subtree
+
+$ git remote add -f bin ../bin/
+$ git merge -s ours --no-commit --allow-unrelated-histories bin/master  # merge remote project into the local project, but not commit
+$ git read-tree --prefix=bin/ -u bin/master                   # create a new directory and copy the Git history of the 'bin' project into it
+$ git status                                                  # optional verification to see if changes are staged
+$ git commit -m "merged subtree in gmt"                       # commit the changes
+
+8.3. Add second repo by repeating steps in 8.2
+
+8.4. Remove remote origins
+
+$ git remote rm bin
+$ git remote rm cgi-bin
+
+Now single 'gmt' repo holds merge of both 'bin' and 'cgi-bin' repos.
+
+---------------------------------------------------------
+
+Merge last 10 commits from a second (another external) Git repository into a main repository.
+
+The main Git repository has been created by re-structuring a Git repo migrated from Subversion repo.
+It means that both repos have a common ancestor subtree, but different tree structure:
+- monitoring/gmt/bin # main repo
+- scripts            # second repo
+
+In this case all files in 'scripts' must be stored in 'monitoring/gmt/bin' (not in 'monitoring').
+
+$ cd monitoring                                       # switch to the local repo
+$ git remote add -f pushes ../push_scripts            # add second repo to remote list
+$ git cherry-pick pushes/master~10..pushes/master -X theirs --strategy=subtree  # merge last 10 commits from second repo, -X theirs resolves merge conflict by prefering commits from the second repo, --strategy=subtree matches the tree structure
+
+$ git cherry-pick pushes/master~10..pushes/master -X theirs -X subtree=gmt/bin  # alternate of cherry-pick
+
+$ git commit --allow-empty     # cherry-pick halts due to conflict resolution, to continue make an empty commit
+$ git cherry-pick --continue   # after commiting empty cherry-pick, repeat it until all commits are merged
+
+---------------------------------------------------------
+
+Useful links:
+[1] Migrating from SVN to Git while splitting repository
+https://blogs.ed.ac.uk/timc/2017/11/24/migrating-from-svn-to-git-while-splitting-repository/
+[2] Manage multiple projects within a single repository
+https://docs.github.com/en/free-pro-team@latest/github/using-git/about-git-subtree-merges
+[3] Merge multiple Git repositories into one
+https://www.netways.de/blog/2019/05/23/how-to-merge-multiple-git-repositories-into-one/
+[4] Getting Subversion authors for Git migration
+https://stackoverflow.com/questions/9540757/getting-list-of-svn-users-for-subversion-git-migration
+
+Useful commands (svn, git)
+
+Create .gitignore from svn:ignore property
+
+$ svn checkout https://my.svn.repo  # clone repo
+$ git svn show-ignore > .gitignore                # create .gitignore
+
+Rebase 'master_of_bash_scripts' branch on top of 'master' branch
+
+$ git checkout master_of_bash_scripts     # switch to 'master_of_bash_scripts'
+$ git rebase master                       # do rebase
+$ git checkout master                     # merge 'master_of_bash_scripts' to 'master'
+$ git merge master_of_bash_scripts
+$ git branch -d master_of_bash_scripts    # remove 'master_of_bash_scripts' branch
