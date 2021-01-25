@@ -1,6 +1,6 @@
 # Running freeRADIUS on Raspberry Pi
 
-A short guide to set up a RADIUS server on Raspberry Pi with Raspbian (v4.1.7-v7.
+A short guide to set up a RADIUS server on Raspberry Pi with Raspbian (v4.1.7-v7).
 
 ## Installation of freeRADIUS
 
@@ -71,3 +71,6 @@ Test with a RADIUS server (on WR switches)
 radtest 00267b0004da 00267b0004da 192.168.2.1 10 mysecret # send access request to the RADIUS server running on Raspberry Pi with the IP address of 192.168.2.1
 ```
 Depending on configuration one should see either 'Access' or 'Reject' packet.
+
+## Links
+[ubuntuusers](https://wiki.ubuntuusers.de/FreeRADIUS/)
