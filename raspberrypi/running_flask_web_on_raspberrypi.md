@@ -73,8 +73,22 @@ $ python3 app.py
 ```
 
 Browse the web app from other host (use hostname/IP address and port 5000, e.g., **raspberrypi:5000**)
+You should see the web page, if everything works properly.
 
-### Set up Nginx
+### Nginx setup
+
+This setup is only necessary if you want to optimize the web server performance.
+Alter the settings in **/etc/nginx/nginx.conf** file.
+
+1) Set **multi_accept** directive to **on**. It informs each worker_process to accept all new connections at a time.
+
+2) Change **keepalive_timeout** to **30**. This directive should be lowered so that idle connections can be closed earlier at 30 seconds.
+
+3) Set **server_tokens** to **off**. This will disable emitting the Nginx version number in error messages and response headers.
+
+4) Set **gzip_vary** to **on**. This tell proxies to cache both the gzipped and regular version of a resource.
+
+5) Set **gzip_proxied** to **any**. It will ensure all proxied request responses are gzipped.
 
 ## Install, set up Gunicorn
 
