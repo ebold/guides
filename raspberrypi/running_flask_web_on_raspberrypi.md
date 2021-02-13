@@ -65,10 +65,10 @@ if __name__ == '__main__':
     app.run(host="0.0.0.0")
 ```
 
-Now launch your Flask app (assume **myflaskapp** is directory of your Flask repo and **app.py** is your Flask app)
+Now launch your Flask app (assume **myflask** is directory of your Flask repo and **app.py** is your Flask app)
 
 ```
-$ cd /var/www/html/myflaskapp
+$ cd /var/www/html/myflask
 $ python3 app.py
 ```
 
