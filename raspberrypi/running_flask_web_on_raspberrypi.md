@@ -187,7 +187,63 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful
 $ sudo service nginx reload
 ```
 
-## Install, set up Gunicorn
+## Gunicorn
+
+Gunicorn is a stand-alone WSGI web application server that supports Flask framework.
+
+### Basics (installation, setup)
+
+```
+$ sudo pip3 install gunicorn     # installation with pip
+```
+
+To run it manually:
+```
+$ gunicorn --bind=unix:/tmp/gunicorn.sock app:app
+```
+
+The **--bind=unix:/tmp/gunicorn.sock** parameter binds the unix socket to what is setup in Nginx **location @wsgi** configuration.
+The **app:app** parameter has form of **module:calleable** and refers to a Flask object (app = Flask(__name__)) in a given Flask application (app.py).
+There are other parameters that support better handling of the HTTP requests: **--workers** and **--threads**.
+
+In order to check if both Nginx and Gunicorn have been properly setup, point to your local web server's IP address in your web browser. You should see your Flask web application! Stop it with __Control + C__ key combination.
+
+### Configure as system service
+
+**systemd** is used to automate the running of Gunicorn after system boot.
+Below configuration should be given in **/etc/systemd/system/gunicorn.service** configuration file:
+
+```
+[Unit]
+Description=gunicorn daemon for /var/www/html/myflask/app.py
+After=network.target
+
+[Service]
+User=pi
+Group=www-data
+RuntimeDirectory=gunicorn
+WorkingDirectory=/var/www/html/
+ExecStart=/usr/local/bin/gunicorn --bind=unix:/tmp/gunicorn.sock --workers=2 app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now start the Gunicorn service and enable it to start at boot:
+
+```
+$ sudo systemctl enable gunicorn  # enable startup at boot
+$ sudo systemctl start gunicorn   # start now
+$ sudo systemctl status gunicorn  # check if service process is running
+```
+
+Is any change is made to **/etc/systemd/system/gunicorn.service**, then reload the daemon service and restart the Gunicorn process:
+```
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart gunicorn
+```
 
 ## Enable public access from Internet
 
