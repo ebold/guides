@@ -122,10 +122,10 @@ gzip_types
 
 Other settings relevant to the **server** directive is usually stored ina separate configuration file and get loaded into the overall configuration structure through **include /etc/nginx/sites-enabled/*;** directive at the end of the **/etc/nginx/nginx.conf** file. Normally all available server configuration files are located in **/etc/nginx/sites-available** and are activated by a symbolic link in **/etc/nginx/sites-enabled** directory.
 
-First, in the **/etc/nginx/sites-available/** directory a custom server configuration file **myflaskapp** is created with following nginx directives:
+First, in the **/etc/nginx/sites-available/** directory a custom server configuration file **myflask** is created with following nginx directives:
 
 ```
-$ sudo nano /etc/nginx/sites-available/myflaskapp
+$ sudo nano /etc/nginx/sites-available/myflask
 
 server {
 	listen 80 default_server;
@@ -174,7 +174,7 @@ $ ll
 total 0
 lrwxrwxrwx 1 root root 34 Jun 17 13:46 default -> /etc/nginx/sites-available/default
 $ sudo rm default
-$ sudo ln -s /etc/nginx/sites-available/myflaskapp .
+$ sudo ln -s /etc/nginx/sites-available/myflask .
 ```
 
 Test the Nginx configuration and reload it if everything looks good:
