@@ -247,6 +247,72 @@ $ sudo systemctl restart gunicorn
 
 ## Enable public access from Internet
 
+Our web server is ready and accessable from local network.
+But if this server should be accessed from Internet and your Internet service provider (ISP) assigns dynamic IP address to your router, then dynamic domain name system (DynDNS) needs to be installed. One concept is to update DNS records by using an update client, which provides a persistent addressing method for devices that change their IP addresses frequently.
+
+### No-IP dynamic update client
+
+[No-IP](https://www.noip.com) is one of such freely available services. Its free-of-charge option only requires that DNS name must be called at least every 30 days.
+
+You should sign up in No-IP to get a persistent domain name. Notice your No-IP credential to configure its dynamic update client (DUC). Once the domain name registration is completed, the update client is installed and configured.
+
+Download a tarball and decompress it as follows:
+```
+$ cd && mkdir noip
+$ cd noip/
+$ wget https://www.noip.com/client/linux/noip-duc-linux.tar.gz
+$ tar vzxf noip-duc-linux.tar.gz
+$ cd noip-2.1.9-1/
+```
+
+### Installation, configuration
+
+To install the update client, invoke:
+```
+$ sudo make
+$ sudo make install         # your No-IP credential is asked here!
+```
+
+After installation the update client can be started by invoking:
+```
+$ sudo /usr/local/bin/noip2
+$ sudo noip2 -S             # check if the service runs successfully
+```
+
+By default, the service does not start at boot. In order to enable automatic startup at boot, alter the configuration in **/etc/systemd/system/noip2.service**:
+
+```
+$ sudo nano /etc/systemd/system/noip2.service
+
+[Unit]
+Description=No-ip.com dynamic IP address updater
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+Alias=noip.service
+
+[Service]
+ExecStart=/usr/local/bin/noip2
+Restart=always
+Type=forking
+```
+
+Now start the update client service and enable it to start at boot:
+```
+$ sudo systemctl enable noip2.service
+$ sudo systemctl start noip2.service
+$ sudo systemctl status noip2.service
+```
+
+If the service was failed to start, alter the limit in **/etc/systemd/system.conf** and reload the configuration, restart the service:
+```
+$ sudo nano /etc/systemd/system.conf     # set the limit???
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart noip2.service
+```
+
 ## Why don't you use heroku?
 
 Heroku free hosting service could be used to deploy a web app developed with the Flask framework.
