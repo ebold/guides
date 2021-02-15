@@ -245,6 +245,25 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl restart gunicorn
 ```
 
+### Gunicorn cannot start (unsufficient permission of an user file)
+
+In this example Gunicorn cannot start because of missing permission for an user file.
+Setting file permission to writeable for all solves the problem.
+```
+$ grep gunicorn /var/log/syslog
+...
+Jun 17 16:12:51 ghost gunicorn[369]:   File "/var/www/html/myflask/app.py", line 118, in poll
+Jun 17 16:12:51 ghost gunicorn[369]:     with open(result_filename, 'w') as f:
+Jun 17 16:12:51 ghost gunicorn[369]: PermissionError: [Errno 13] Permission denied: 'result.json'
+
+$ cd /var/www/html/myflask
+$ ll
+total 272
+...
+-rw-r--r-- 1 root root   6175 Jun 17 14:10 result.json
+$ sudo chmod 666 result.json
+```
+
 ## Enable public access from Internet
 
 Our web server is ready and accessable from local network.
