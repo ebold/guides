@@ -13,7 +13,19 @@ Here the former method is described: using a separate swap partition.
 
 In order to enable hibernation a **separate swap partition** (larger than RAM size) is required.
 
-TODO: insert command to check swap partition
+To determine the type of the swap space:
+```
+$ cat /proc/swaps
+
+Filename    Type        Size       Used    Priority
+/dev/sdb1   partition   17169404   0       -2             # swap partition
+```
+
+If the command output looks like below, then your system uses the swap file:
+```
+Filename    Type   Size      Used    Priority
+/swapfile   file   2097148   38356   -2                   # swap file!
+```
 
 ### Update fstab (if fstab does not contain swap partition)
 
