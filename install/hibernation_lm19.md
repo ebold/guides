@@ -29,9 +29,11 @@ Filename    Type   Size      Used    Priority
 
 ### Update fstab (if fstab does not contain swap partition)
 
-Because of default swap space as swap file, the swap partition might not be listed in **/etc/fstab**. If so remove the swap file and add the swap partition to **/etc/fstab**.
-
-TODO: insert command to edit /etc/fstab
+Because of default swap space as swap file, the swap partition might not be listed in **/etc/fstab**. If so remove the swap file and add the swap partition to **/etc/fstab**:
+```
+UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx none            swap    sw              0       0     # entry with swap partition info
+#/swapfile                                 none            swap    sw              0       0
+```
 
 ## Check if hibernation works from CLI
 
