@@ -325,9 +325,9 @@ $ sudo systemctl start noip2.service
 $ sudo systemctl status noip2.service
 ```
 
-If the service was failed to start, alter the limit in **/etc/systemd/system.conf** and reload the configuration, restart the service:
+If the service was failed to start, alter the default start limit in **/etc/systemd/system.conf** and reload the configuration, restart the service:
 ```
-$ sudo nano /etc/systemd/system.conf     # set the limit???
+$ sudo nano /etc/systemd/system.conf     # DefaultStartLimitIntervalSec=10s, DefaultStartLimitBurst=5
 $ sudo systemctl daemon-reload
 $ sudo systemctl restart noip2.service
 ```
