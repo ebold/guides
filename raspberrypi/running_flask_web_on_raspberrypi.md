@@ -158,6 +158,8 @@ server {
 
 With above configurations, Nginx listens on port 80 for HTTP requests directed at the domain **songuuli2020.ddns.net**. For each such request, Nginx references the directory **/var/www/html/myflask** as the document root.
 
+:fire: __Please set up the port sharing in your router to allow HTTP access.__ Choose **port=80** and **protocol=TCP**.
+
 The **location /static** block maps the HTTP requests to the static content (ie. sitemap.xml, robots.txt and icon) in the **/var/www/html/myflask/static** directory, which are not related to the Flask app.
 
 The **location /** block maps the HTTP requests to a file inside the document root directory and return it as a HTTP response if there is one. This ensures the content such as robots.txt get served by the Nginx server. If the request is not a file that can be found at this root directory, then Nginx should issue an internal redirect to the upstream server defined in the **@wsgi** block.
