@@ -19,3 +19,8 @@ C/C++
 3. Christopher Kormanyos, Real-Time C++ Efficient Object-Oriented and Template Microcontroller Programming, 2. ed, 2015, 978-3-662-47809-7, ST 250 C01 K84
 4. W. Richard Stevens, Stephen A. Rago, Advanced Programming in the UNIX Environment, 3. ed, 2015, 978-0-321-63773-4, ST 261 U61 S846
 5. Jens Gustedt, Modern C, 1. ed, 2019, 978-1617295812
+
+System administration
+
+1. Evi Nemeth, Garth Snyder et al, Unix and Linux System Administration Handbook, 5. ed, 2018, 978-0134277554, ST 261 N433
+2. Brian Ward, How Linux Works: What Every Superuser Should Know, 3. ed, 2021, 978-1718500402
