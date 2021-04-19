@@ -17,3 +17,5 @@ C/C++
 1. Andrew Koenig, C Traps and Pitfalls, 1989, 0-201-17928-8
 2. Andrew Koenig, Barbara E. Moo, Accelerated C++: practical programming by example, 2000, 0-201-70353-X
 3. Christopher Kormanyos, Real-Time C++ Efficient Object-Oriented and Template Microcontroller Programming, 2. ed, 2015, 978-3-662-47809-7, ST 250 C01 K84
+4. W. Richard Stevens, Stephen A. Rago, Advanced Programming in the UNIX Environment, 3. ed, 2015, 978-0-321-63773-4, ST 261 U61 S846
+5. Jens Gustedt, Modern C, 1. ed, 2019, 978-1617295812
