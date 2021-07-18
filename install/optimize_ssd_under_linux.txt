@@ -1,0 +1,131 @@
+Best practices to optimize SSD under Linux (Mint 20.2, Ubuntu 20.04.x) [1]
+
+1. Select the AHCI mode (BIOS/UEFI)
+
+An SSD is usually recognized properly, when in the BIOS/UEFI the feature AHCI has been activated for the SATA interface.
+
+2. Update firmware
+
+Check the manufacturer's website for an update. The update is usually shipped as an iso file, so it doesn't matter that you're running Linux.
+
+3. Select EXT4 for filesystem
+
+The EXT4 is assumed to be the best filesystem for an SSD. The write activity caused by journaling in EXT4 is not very much compared to the BTRFS filesystem.
+
+4. Avoid quick wear by reducing write actions
+
+An SSD is worn down by write actions.
+Steps given below help to keep wear down to a reasonable minimum, by limiting the write actions.
+
+4.1. Set the daily TRIM job
+
+For the good permorfance of SSD the cleaning action TRIM is usually recommended.
+Note: old SSDs before 2010 usually don't support TRIM.
+
+Automatic weekly TRIM is enabled by default in Linux Mint and Ubuntu, when they are installed on an SSD.
+To change it to daily interval, invoke following commands:
+
+$ sudo mkdir -v /etc/systemd/system/fstrim.timer.d # create new folder
+$ sudo touch /etc/systemd/system/fstrim.timer.d/override.conf # create new file
+
+Now edit new file with your favourite editor and add/modify following settings:
+
+[Timer]
+OnCalendar=
+OnCalendar=daily
+
+Note: double entries for "OnCalendar" is intentional!
+
+Confirm the configuration by invoking a following command:
+
+$ systemctl cat fstrim.timer
+
+An output below is expected:
+
+# /lib/systemd/system/fstrim.timer
+[Unit]
+Description=Discard unused blocks once a week
+Documentation=man:fstrim
+ConditionVirtualization=!container
+
+[Timer]
+OnCalendar=weekly
+AccuracySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# /etc/systemd/system/fstrim.timer.d/override.conf
+[Timer]
+OnCalendar=
+OnCalendar=daily
+
+The activity of fstrim can be checked by invoking:
+
+$ journalctl | grep fstrim.service
+
+If you need to undo and revert to a weekly TRIM, just remove the overriding settings:
+
+$ sudo rm -v /etc/systemd/system/fstrim.timer.d/override.conf
+
+Or you can execute TRIM manually:
+
+$ sudo fstrim -av # it could take some minutes, simply wait patiently
+
+or 
+
+$ sudo fstrim -v / # in case if -av doesn't work
+
+4.2. Limit swap wear
+
+In Linux swappiness determines when to start using swap. It scales 0-100, and the default is 60.
+For SSDs, the default of 60 causes too many write activities.
+The optimal compromise is probably 20.
+
+Commands given below help you to set/modify the swappiness:
+
+$ cat /proc/sys/vm/swappiness # check current settings
+$ sudo nano /etc/sysctl.conf  # open settings file and add "vm.swappiness=20" at the very end
+
+Reboot is needed that the change is getting effective.
+
+4.3. Limit disk write actions of Firefox
+
+By putting the Firefox cache into the RAM and disabling sessionstore you can limit its disk write actions.
+Note: repeat hacks in each user account.
+
+4.3.1. Put the network cache into RAM
+
+Note: don't do this when your computer has less than 2 GB of RAM!
+
+Proceed like these:
+
+> about:config                # type it in the URL bar of Firefox
+> browser.cache.disk.enable   # type it into filter/search bar and toggle its value to "false"
+> browser.cache.memory.enable # type it into filter/search and check its value, this should be set to "true"
+> browser.cache.memory.capacity # -1 means automatic settings, so set it to eg 524288 KB (512 MB) or 1048576 (1 GB)
+
+Restart Firefox and check its cache usage:
+
+> about:cache
+
+4.3.2. Lower sessionstore interval
+
+The session restore feature remembers what pages were opened if Firefox experiences crashes. This feature is nice, but causes many disk writes for an SSD.
+
+> about:config                # type it in the URL bar of Firefox
+> browser.sessionstore.interval # 15000 (15 sec) is default, eg. increase it to 900000 (15 minutes)
+
+Restart Firefox.
+
+4.4. Limit disk write actions of Chrome
+
+Disable "preload" feature that causes a lot of extra network traffic and writes.
+
+> Settings -> Privacy and security -> Cookies and site data -> Preload pages faster browsing and searching: disable it
+
+Note: proceed it also for each user account.
+
+Links:
+[1] https://easylinuxtipsproject.blogspot.com/p/ssd.html
