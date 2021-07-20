@@ -1,0 +1,20 @@
+1. Create a tarball 'archive.tar.bz2', which includes all files of the 'my_archive' folder
+
+$ tar -cvJf archive.tar.bz2 my_archive/*
+
+2. Split the tarball 'archive.tar.bz2' into multiple files with the fixed size of 20 MBytes
+
+$ split -b 20M archive.tar.bz2 "archive.tar.bz2.part"
+
+3. Combine multiple files into a single file 'my_archive_joined.tar.bz2'
+
+$ cat archive.tar.bz2.parta* > joined.tar.bz2
+
+4. Extract tarball into the 'extracted' folder
+
+$ mkdir extracted
+$ tar -xvJf joined.tar.bz2 -C extracted/
+
+Links:
+
+[1] https://www.tecmint.com/split-large-tar-into-multiple-files-of-certain-size/
