@@ -1,0 +1,18 @@
+1. Add "acpi=force" to GRUB2 boot options [1]
+
+$ sudo nano /etc/default/grub   # open configuration
+
+# add "acpi=force" to GRUB_CMDLINE_LINUX
+
+$ sudo grub2-mkconfig
+
+$ sudo reboot
+
+2. Check BIOS version [2]
+
+$ sudo dmidecode --type bios
+
+[1] https://www.thegeekdiary.com/how-to-disable-acpi-in-centos-rhel-7/
+
+[2] https://www.cyberciti.biz/faq/check-bios-version-linux/
+[3] https://www.ecs.com.tw/en/Product/Motherboard/945GCT-M2_1333/download
