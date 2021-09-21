@@ -1,0 +1,103 @@
+Black screen with cursor after installing Nvidia driver in Linux Mint 20.2
+
+Target system: Lenovo Campus IdeaPad 5 Pro-16ACH and Linux Mint 20.2 (Uma) Cinnamon (AMD Ryzen 7 5800H OctaCore (3.20 to 4.40 GHz),
+               512GB NVMe-SSD, 16GB RAM, NVIDIA GeForce RTX 3050 4GB, 40,64 cm (16") 2.5K/WQXGA IPS matt (2560 x 1600))
+
+1. Steps proceeded to install Nvidia driver (470.xx)
+
+1.1. Set up UEFI settings
+
+F2 -> Configuration -> Graphics Device -> Switchable graphics
+                    -> System Performance Mode -> Extreme performance
+
+1.2. Install Linux Mint 20.2 (Uma) Cinnamon (kernel 5.4) using a bootable USB stick
+
+Make partitions in 512 GB SSD:
+ESP partition = 1024 MB
+Root partition = 250000 MB
+Home partition = 244701 MB
+Swap partition = 16384 MB
+
+1.3. Update the existing packages
+
+$ sudo apt update
+$ sudo apt upgrade
+
+1.4. Check the VGA/3d device
+
+$ lspci | grep -iE "vga|3d"
+
+Expected:
+01:00.0 3D controller: NVIDIA Corporation GA107 (rev a1)
+05:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Cezanne (rev c5)
+But, presented:
+01:00.0 3D controller: NVIDIA Corporation Device 25a2 (rev a1)
+05:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Device 1638 (rev c5)
+
+1.5. Check the actual kernel and install the latest kernel package (5.11.22) [1]
+
+$ uname -a    # should return '5.4.*'
+
+$ URL_KERNEL_MAINLINE=https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.11.22/amd64
+$ cd /tmp
+$ wget -c $URL_KERNEL_MAINLINE/linux-headers-5.11.0-20_5.11.0-20.21+21.10.1_all.deb
+$ wget -c $URL_KERNEL_MAINLINE/linux-image-unsigned-5.11.0-20-generic_5.11.0-20.21+21.10.1_amd64.deb
+$ wget -c $URL_KERNEL_MAINLINE/linux-modules-5.11.0-20-generic_5.11.0-20.21+21.10.1_amd64.deb
+$ wget -c $URL_KERNEL_MAINLINE/linux-modules-extra-5.11.0-20-generic_5.11.0-20.21+21.10.1_amd64.deb
+$ sudo dpkg -i *.deb
+$ sudo reboot
+
+1.6. Check again kernel version and VGA device
+
+VGA device might still haven't proper name:
+01:00.0 3D controller: NVIDIA Corporation Device 25a2 (rev a1)
+05:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Device 1638 (rev c5)
+
+1.7. Update the existing packages using apt
+1.8. Install the Nvidia driver using package manager
+
+Mint menu (Window button) -> Driver Manager -> Choose "470.xx" from the list and apply
+
+1.9. Use UNIGINE Superposition benchmarking tool to test the GeForce graphic controller performance [2]
+
+Visit the website and download the tool. Make it executable and install in the current directory.
+Finally launch it.
+
+$ chmod +x Unigine_Superposition-1.1.run
+$ cd Unigine_Superposition-1.1
+$ ./Superposition
+
+1.10. Optional, install and run Steam
+
+2. External links used to solve black screen problem
+
+The solution is upgrade the linux kernel to latest, refer to [3]
+To install or upgrade the linux kernel, refer to [4]
+Instructions to install the Nvidia driver manually, refer to [5]
+Nvidia Linux driver for download, refer to [6]
+Infos related to Nvidia Optimus technology, refer to [7], [8], [9]
+Additional, informative about Nvidia GeForce 30 series devices, driver configuration and installation, refer to [10], [11], [12]
+
+[1] Ubuntu kernel mainline, https://kernel.ubuntu.com/~kernel-ppa/mainline/v5.11.22/amd64/
+
+[2] UNIGINE Superposition benchmark, https://benchmark.unigine.com/superposition
+
+[3] Solution for Asus Rog Strix with AMD Ryzen 9 and Nvidia RTX 3070, https://forums.developer.nvidia.com/t/ubuntu-mate-20-04-with-rtx-3070-on-ryzen-5900-black-screen-after-boot/167681/30
+
+[4] Install or Upgrade To Latest Linux Kernel on Ubuntu 20.04 & Linux Mint 20, https://linuxhint.com/install-upgrade-linux-kernel-ubuntu-linux-mint/
+
+[5] Install NVIDIA (470.xx, 465.xx, 460.xx, 390.xx, 340.xx) Drivers on Debian, Ubuntu, Linux Mint and LMDE, https://www.if-not-true-then-false.com/2021/debian-ubuntu-linux-mint-nvidia-guide/
+
+[6] Nvidia driver downloads, https://www.nvidia.de/Download/index.aspx?lang=de
+
+[7] NVIDIA Optimus, https://wiki.debian.org/NVIDIA%20Optimus#Using_NVIDIA_PRIME_Render_Offload
+
+[8] Using the NVIDIA Driver with Optimus Laptops, http://download.nvidia.com/XFree86/Linux-x86_64/470.63.01/README/optimus.html
+
+[9] PRIME Render Offload, http://download.nvidia.com/XFree86/Linux-x86_64/470.63.01/README/primerenderoffload.html
+
+[10] GeForce 30 series, https://en.wikipedia.org/wiki/GeForce_30_series
+
+[11] Installation, configuration of Nvidia driver in Ubuntu (20.04 Focal Fossa), https://wiki.ubuntuusers.de/Grafikkarten/Nvidia/nvidia/
+
+[12] Install Nvidia driver (460.xx) in Linux Mint (kernel 5.4), https://websetnet.net/de/how-to-install-nvidia-drivers-on-linux-mint-beginners-guide/
