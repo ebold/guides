@@ -5,9 +5,11 @@
 Assume you (named __asterix__) want to log in to a remote host (named __forest__) as another user (named __obelix__).
 In order to secure your access you have generated SSH key pairs for the user __obelix__ and
 copied his public key to the remote host __forest__.
+The key file 'obelix' is created in '~/.ssh' directory using the ECDSA algorithm (public key length is 521 bit).
+
 
 ```
-asterix@home$ ssh-keygen -f ~/.ssh/obelix                     # with passphrase 'gallier'
+asterix@home$ ssh-keygen -f ~/.ssh/obelix -t ecdsa -b 521     # type 'gallier' for passphrase
 asterix@home$ ssh-copy-id -i ~/.ssh/obelix.pub obelix@forest  # you'll be authenticated by password at this time
 ```
 
@@ -43,3 +45,4 @@ obelix@forest$ chmod 700 $HOME/.ssh
 ## Source
 
 Credit to this [post](https://unix.stackexchange.com/questions/407394/ssh-copy-id-succeeded-but-still-prompt-password-input).
+Secure Shell [website](https://www.ssh.com/academy/ssh/keygen#creating-an-ssh-key-pair-for-user-authentication)
