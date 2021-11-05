@@ -1,0 +1,29 @@
+1. python: not found or command not found
+
+On Ubunt 20.04 clonned a python project, but it was failed and returned:
+
+$ make all
+make: python: Command not found
+make: *** [Makefile:2: all] Error 127
+
+Asking the installed python version returns:
+
+$ which python       # no output
+$ python --version
+Python 3.8.10
+
+The reason is that the python project is only compatible with Python 2.x.
+
+A simple solution might be a symlink to existing Python 3.8.
+
+$ sudo ln -s /usr/bin/python3 /usr/bin/python
+$ ll /usr/bin/python*
+lrwxrwxrwx 1 root root      16 Nov  5 15:50 /usr/bin/python -> /usr/bin/python3*
+$ which python
+/usr/bin/python
+
+2. FileNotFoundError: [Errno 2] No such file or directory: 'dot'
+
+When calling write_svg() method of the pydot module returns above error, Graphviz package might be missing on your system.
+
+$ sudo apt install graphviz
