@@ -16,8 +16,8 @@
   * Cyber-Physical Systems
 
 * Dartmouth_IMTx
-  [x] C Programming with Linux
-  [x] C Programming: Using Linux Tools and Libraries
+  - [x] C Programming with Linux
+  - [x] C Programming: Using Linux Tools and Libraries
 
 * DelftX
   * Introduction to Aeronautical Engineering
