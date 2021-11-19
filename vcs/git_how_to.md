@@ -108,3 +108,18 @@ $ cat .git/config              # look at directly to configuration file or,
 $ git config --global --list   # presents global configuration or,
 $ git config --local --list    # shows local configuration
 ```
+
+## Set up username and passwords for different Git repositories
+
+Git has its own way to handle different credentials for different Git repositories using gitcredentials.
+You can unset and set credentials for a each repository (**invoke commands inside each repository directory**):
+
+```
+$ git config --unset credential.helper                                         # unset local credential
+$ git config credential.helper 'store --file ~/.git-credentials.<repo_name>'   # create credentials for this repo
+$ git config --global --list                                                   # check global and local settings
+$ git config --local --list
+```
+
+Links:
+- [Set up username and passwords for different Git repositories](https://unix.stackexchange.com/questions/335704/how-to-set-up-username-and-passwords-for-different-git-repos)
