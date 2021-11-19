@@ -123,3 +123,13 @@ $ git config --local --list
 
 Links:
 - [Set up username and passwords for different Git repositories](https://unix.stackexchange.com/questions/335704/how-to-set-up-username-and-passwords-for-different-git-repos)
+
+## List remote Git branches and sort them by most recent commit date
+
+
+```
+for branch in `git branch -r | grep -v HEAD`;do echo -e `git show --format="%ci %cr" $branch | head -n 1` \\t$branch; done | sort -r
+```
+
+Links:
+- [Stackoverflow](http://stackoverflow.com/a/2514279)
