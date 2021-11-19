@@ -54,6 +54,22 @@ $ git config credential.helper 'store --file ~/.git-credentials.<my_clone>'
 Links:
 - [Clone a Github private repo](https://stackoverflow.com/questions/2505096/clone-a-private-repository-github)
 
+## If Github claims 'Fatal: repository not found'
+
+It may happen that you get a following error when you want to update a local repo of your private repo, **which has not been used longer**:
+
+```
+$ git pull
+remote: Repository not found.
+fatal: repository 'https://github.com/<my_private_repo>' not found
+```
+
+In this case update its remote URL with your username:
+
+```
+$ git remote set-url origin https://<user_name>@github.com/<my_private_repo>
+```
+
 ## Use Github personal access token (PAT)
 
 Store Github personal access token (PAT) locally to reduce the number of times you must type your username or password:
