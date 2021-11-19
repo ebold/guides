@@ -53,3 +53,16 @@ $ git config credential.helper 'store --file ~/.git-credentials.<my_clone>'
 
 Links:
 - [Clone a Github private repo](https://stackoverflow.com/questions/2505096/clone-a-private-repository-github)
+
+## Use Github personal access token (PAT)
+
+Store Github personal access token (PAT) locally to reduce the number of times you must type your username or password:
+
+```
+$ git config credential.helper store
+$ git push
+Username: <type your username>
+Password: <insert your personal access token>   # your credential is stored in ~/.git-credentials
+```
+
+Next time when you push your commits, you won't be prompted for password :).
