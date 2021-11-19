@@ -66,3 +66,29 @@ Password: <insert your personal access token>   # your credential is stored in ~
 ```
 
 Next time when you push your commits, you won't be prompted for password :).
+
+## Configure your Git username and email
+
+By default you configure your global username and email address after installing Git. However, you can also configure repository-specific another username and email address.
+
+To set your global username/email configuration:
+
+```
+$ git config --global user.name "first_name last_name"   # set your username
+$ git config --global user.email "me@mail.com"           # set your email address
+```
+
+To set repository-specific username/email configuration (**in the repository directory**):
+
+```
+$ git config user.name "first_name last_name"
+$ git config user.email "me@anothermail.com"
+```
+
+Verify your configuration by displaying your configuration file:
+
+```
+$ cat .git/config              # look at directly to configuration file or,
+$ git config --global --list   # presents global configuration or,
+$ git config --local --list    # shows local configuration
+```
