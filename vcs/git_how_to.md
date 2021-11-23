@@ -1,5 +1,24 @@
 # How to: git tricks
 
+## Install or upgrade Git in Linux (Debian/Ubuntu/Mint)
+
+Install the latest stable version
+
+```
+$ sudo apt install git
+```
+
+Install the latest stable upstream Git version
+
+```
+$ sudo add-apt-repository ppa:git-core/ppa
+$ sudo apt update
+$ sudo apt install git
+```
+
+Links:
+- [Install Git on Linux](https://git-scm.com/download/linux)
+
 ## Cherry pick a commit from another repository
 
 To cherry pick a single commit from other existing repository:
