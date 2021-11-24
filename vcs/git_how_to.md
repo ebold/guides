@@ -134,7 +134,7 @@ Git has its own way to handle different credentials for different Git repositori
 You can unset and set credentials for a each repository (**invoke commands inside each repository directory**):
 
 ```
-$ git config --unset credential.helper                                         # unset local credential
+$ git config --global --unset credential.helper                                # unset global credential helper
 $ git config credential.helper 'store --file ~/.git-credentials.<repo_name>'   # create credentials for this repo
 $ git config --global --list                                                   # check global and local settings
 $ git config --local --list
