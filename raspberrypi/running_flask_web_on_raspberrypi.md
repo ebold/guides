@@ -271,13 +271,18 @@ $ sudo chmod 666 result.json
 Our web server is ready and accessable from local network.
 But if this server should be accessed from Internet and your Internet service provider (ISP) assigns dynamic IP address to your router, then dynamic domain name system (DynDNS) needs to be installed. One concept is to update DNS records by using an update client, which provides a persistent addressing method for devices that change their IP addresses frequently.
 
-### No-IP dynamic update client
+### No-IP dynamic update client (DUC)
 
 [No-IP](https://www.noip.com) is one of such freely available services. Its free-of-charge option only requires that DNS name must be called at least every 30 days.
 
-You should sign up in No-IP to get a persistent domain name. Notice your No-IP credential to configure its dynamic update client (DUC). Once the domain name registration is completed, the update client is installed and configured.
+You should sign up in No-IP to get a persistent domain name. Create a **hostname** (example: yourname.ddns.net).
+This will be the URL you will use to connect to your device from anywhere. You need to know your IP address assigned by your ISP.
 
-Download a tarball and decompress it as follows:
+### Installation, configuration of No-IP DUC
+
+Once a hostname is created, install and configure the No-IP dynamic update client (DUC).
+
+Download a tarball and decompress:
 ```
 $ cd && mkdir noip
 $ cd noip/
@@ -285,8 +290,6 @@ $ wget https://www.noip.com/client/linux/noip-duc-linux.tar.gz
 $ tar vzxf noip-duc-linux.tar.gz
 $ cd noip-2.1.9-1/
 ```
-
-### Installation, configuration
 
 To install the update client, invoke:
 ```
@@ -333,6 +336,8 @@ $ sudo nano /etc/systemd/system.conf     # DefaultStartLimitIntervalSec=10s, Def
 $ sudo systemctl daemon-reload
 $ sudo systemctl restart noip2.service
 ```
+
+If you are behind a router or firewall, you will need to open and forward the correct ports (80 and 443) for the web services.
 
 ## (optional) Set the static IP address
 
