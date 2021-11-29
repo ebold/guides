@@ -133,7 +133,7 @@ server {
 
 	root /var/www/html/myflask;
 
-	server_name songuuli2020.ddns.net;
+	server_name songuuli2020.ddns.net www.songuuli2020.ddns.net;
 
 	location /static {
 		alias /var/www/html/myflask/static;
@@ -187,6 +187,22 @@ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 
 $ sudo service nginx reload
+```
+
+If you get an error given below, then it might caused by a long domain name:
+```
+nginx[2312]: nginx: [emerg] could not build server_names_hash, you should increase server_names_hash_bucket_size: 32
+nginx[2312]: nginx: configuration file /etc/nginx/nginx.conf test failed
+```
+
+Add/modify entry **server_names_hash_bucket_size** (in _http_ block) in **/etc/nginx/nginx.conf** to fix this error:
+```
+$ sudo nano /etc/nginx/nginx.conf
+
+http {
+        # ... other entries
+        server_names_hash_bucket_size  64;
+}
 ```
 
 ## Gunicorn
@@ -438,7 +454,7 @@ server {
 
 	root /var/www/html/myflask;
 
-	server_name songuuli2020.ddns.net;
+	server_name songuuli2020.ddns.net www.songuuli2020.ddns.net;
 
     # ... other code for flask
 
@@ -453,10 +469,17 @@ $ sudo systemctl restart nginx
 
 Now run Certbot with the Webroot plugin and obtain the SSL certificate files by issuing (might ask your email address for urgent renewal and security notices):
 ```
-$ sudo certbot certonly --agree-tos --webroot -w /var/lib/letsencrypt/ -d songuuli2020.ddns.net
+$ sudo certbot certonly --agree-tos --webroot -w /var/lib/letsencrypt/ -d songuuli2020.ddns.net -d www.songuuli2020.ddns.net
 ```
 
 If the SSL certificate is successfully obtained, certbot will output the important notice about obtained certificate.
+
+> Exception with No-IP: because of A record type hostname (wildcard is not allowed for free option) Certbot will return a following:
+```
+Failed authorization procedure. www.songuuli2020.ddns.net (http-01): urn:ietf:params:acme:error:dns :: DNS problem: NXDOMAIN looking up A for www.songuuli2020.ddns.net - check that a DNS record exists for this domain
+```
+
+You can ignore it, since SSL certificate will be obtained for the non-www domain name, songuuli2020.ddns.net.
 
 With the certificate file, you need to update the domain server block to force HTTPS and redirect from www to non-www version:
 ```
@@ -468,11 +491,24 @@ server {
 
 	root /var/www/html/myflask;
 
-	server_name songuuli2020.ddns.net;
+	server_name songuuli2020.ddns.net www.songuuli2020.ddns.net;
 
 	...
 	include snippets/letsencrypt.conf;
     return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name www.songuuli2020.ddns.net;
+
+    ssl_certificate /etc/letsencrypt/live/songuuli2020.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/songuuli2020.ddns.net/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/songuuli2020.ddns.net/chain.pem;
+    include snippets/ssl.conf;
+    include snippets/letsencrypt.conf;
+
+    return 301 https://songuuli2020.ddns.net$request_uri;
 }
 
 server {
