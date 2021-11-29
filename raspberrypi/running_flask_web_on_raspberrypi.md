@@ -339,6 +339,189 @@ $ sudo systemctl restart noip2.service
 
 If you are behind a router or firewall, you will need to open and forward the correct ports (80 and 443) for the web services.
 
+## Use a TLS/SSL certificate, [3][4]
+
+A secure communication between your **web server** and **users** is guaranteed with a TLS/SSL certificate. One of the certificate authorities that issue such TSL/SSL certificates freely is [Let’s Encrypt](https://letsencrypt.org). They use Automatic Certificate Management Environment (ACME) protocol to provide free TLS/SSL certificates to any compatible client (Apache and Nginx).
+
+Certificates issued by Let's Encrypt are **domain-validated**: they have to check that the certificate request comes from a person who actually controls the domain. They do this by sending the client a unique token, and then making a web or DNS request to retrieve a key derived from that token.
+
+### Prerequisites
+
+Ensure that you have met the following prerequisites before you proceed:
+- you have a domain name pointing to your public IP address
+- you have installed the Nginx web server
+- your firewall is configured to accept connections on ports 80 and 443
+
+In our case all these requirements are met.
+
+### Install Certbot
+
+Certificates issued by Let's Encrypt are trusted by all popular browsers and valid for 90 days from the issue date. Certbot is a fully-featured and easy to use tool that automates the task for obtaining and renewing Let's Encrypt certificates and configuring web servers to use the certificates.
+
+To install it:
+```
+$ sudo apt update
+$ sudo apt install certbot
+```
+
+### Generate strong Diffie-Hellman (DH) group
+
+The Diffie-Hellman (DH) key exchange is used to securely exchange cryptographic keys over an unsecured communication channel.
+
+Generate a new set of 2048 bit DH parameters (took more than an hour on Raspberry Pi Model B):
+```
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+
+### Obtain a SSL certificate
+
+To obtain an SSL certificate for the domain, the Webroot plugin is used. It works by creating a temporary file for validating the requested domain in the **${webroot-path}/.well-known/acme-challenge** directory. The Let’s Encrypt server makes HTTP requests to the temporary file to verify that the requested domain resolves to the server where certbot runs.
+
+To make it more simple, all HTTP requests for **.well-known/acme-challenge** will be mapped to a single directory, **/var/lib/letsencrypt**.
+
+The following commands will create the directory and make it writable for the Nginx server:
+
+```
+$ sudo mkdir -p /var/lib/letsencrypt/.well-known
+$ sudo chgrp www-data /var/lib/letsencrypt
+$ sudo chmod g+s /var/lib/letsencrypt
+```
+
+Two snippets are created to avoid duplicating code and included in all Nginx server block files:
+- **/etc/nginx/snippets/letsencrypt.conf**:
+- **/etc/nginx/snippets/ssl.conf**: includes the chippers recommended by Mozilla , enables OCSP Stapling, HTTP Strict Transport Security (HSTS) and enforces few security‑focused HTTP headers
+
+Create the first snippet, **letsencrypt.conf**:
+```
+$ sudo nano /etc/nginx/snippets/letsencrypt.conf
+
+location ^~ /.well-known/acme-challenge/ {
+  allow all;
+  root /var/lib/letsencrypt/;
+  default_type "text/plain";
+  try_files $uri =404;
+}
+```
+
+Create the second snippet, **ssl.conf**:
+```
+$ sudo nano /etc/nginx/snippets/ssl.conf
+
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+
+ssl_session_timeout 1d;
+ssl_session_cache shared:SSL:10m;
+ssl_session_tickets off;
+
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+ssl_prefer_server_ciphers on;
+
+ssl_stapling on;
+ssl_stapling_verify on;
+resolver 8.8.8.8 8.8.4.4 valid=300s;
+resolver_timeout 30s;
+
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header X-Frame-Options SAMEORIGIN;
+add_header X-Content-Type-Options nosniff;
+```
+
+Once the snippets are created, include the **letsencrypt.conf** snippet in the domain server block file:
+
+```
+$ sudo nano /etc/nginx/sites-available/myflask
+
+server {
+	listen 80 default_server;
+	listen [::]:80;
+
+	root /var/www/html/myflask;
+
+	server_name songuuli2020.ddns.net;
+
+    # ... other code for flask
+
+	include snippets/letsencrypt.conf;
+}
+```
+
+Restart the Nginx service for the changes to take effect:
+```
+$ sudo systemctl restart nginx
+```
+
+Now run Certbot with the Webroot plugin and obtain the SSL certificate files by issuing (might ask your email address for urgent renewal and security notices):
+```
+$ sudo certbot certonly --agree-tos --webroot -w /var/lib/letsencrypt/ -d songuuli2020.ddns.net
+```
+
+If the SSL certificate is successfully obtained, certbot will output the important notice about obtained certificate.
+
+With the certificate file, you need to update the domain server block to force HTTPS and redirect from www to non-www version:
+```
+/etc/nginx/sites-available/myflask
+
+server {
+	listen 80 default_server;
+	listen [::]:80;
+
+	root /var/www/html/myflask;
+
+	server_name songuuli2020.ddns.net;
+
+	...
+	include snippets/letsencrypt.conf;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name songuuli2020.ddns.net;
+
+    ssl_certificate /etc/letsencrypt/live/songuuli2020.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/songuuli2020.ddns.net/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/songuuli2020.ddns.net/chain.pem;
+    include snippets/ssl.conf;
+    include snippets/letsencrypt.conf;
+
+    # ... other code for flask
+}
+```
+
+Now reload the Nginx service for changes to take effect:
+```
+$ sudo systemctl reload nginx
+```
+
+Verify SSL certification of your website by browsing it with **https://** (padlock icon is expected on successful connection). Make sure port redirection for **port 443** is configured on your router.
+
+An extensive test can be done with [SSL Server Test](https://www.ssllabs.com/ssltest/) from SSL Labs. The overall grade **A+** must be awarded.
+
+### Auto-renew the SSL certificate
+
+As mentioned above Let’s Encrypt’s certificates are valid for 90 days. Fortunatly, the certbot package creates a cronjob and a systemd timer, **/etc/cron.d/certbot**. The timer will automatically renew the certificates 30 days before its expiration. But, when the certificate is renewed, the nginx service needs to be reloaded.
+
+It's done by adding the following line in **/etc/letsencrypt/cli.ini**:
+```
+$ sudo nano /etc/letsencrypt/cli.ini
+
+deploy-hook = systemctl reload nginx
+```
+
+Test the renewal process by invoking:
+```
+$ sudo certbot renew --dry-run
+```
+
+If renewal process was successful, then it will not return any error. An error given below has been returned, but it's ignored temporarily:
+```
+Attempting to renew cert (songuuli2020.ddns.net) from /etc/letsencrypt/renewal/songuuli2020.ddns.net.conf produced an unexpected error: Missing command line flag or config entry for this setting:
+Input the webroot for songuuli2020.ddns.net:. Skipping.
+All renewal attempts failed. The following certs could not be renewed:
+  /etc/letsencrypt/live/songuuli2020.ddns.net/fullchain.pem (failure)
+```
+
 ## (optional) Set the static IP address
 
 Make sure that Raspberry Pi has a static IP address. Otherwise, set the static IP address.
@@ -376,3 +559,5 @@ It means user data is lost either app restart once every 24 hours or after 30 mi
 ## Links
 1. How to properly host Flask application with Nginx and Gunicorn, [link](https://www.e-tinkers.com/2018/08/how-to-properly-host-flask-application-with-nginx-and-guincorn/)
 2. Zugriff auf den eigenen Raspberry Pi aus dem Internet, [link](https://buyzero.de/blogs/news/zugriff-auf-den-eigenen-raspberry-pi-aus-dem-internet)
+3. Secure Nginx with Let's Encrypt on Ubuntu 20.04, [link](https://linuxize.com/post/secure-nginx-with-let-s-encrypt-on-ubuntu-20-04/)
+4. An Introduction to Let's Encrypt, [link](https://www.digitalocean.com/community/tutorials/an-introduction-to-let-s-encrypt)
