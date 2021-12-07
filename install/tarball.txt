@@ -1,12 +1,12 @@
 1. Create a tarball 'archive.tar.bz2', which includes all files of the 'my_archive' folder
 
-$ tar -cpvJf archive.tar.bz2 my_archive/*
+$ tar -cpvjf archive.tar.bz2 my_archive/*
 
 where:
 - c: create a new backup archive
 - p: preserve the permissions of files
 - v: verbose mode
-- J: compress the archive with 'bz2'
+- j: compress the archive with 'bzip2' (z for gzip, J for xz compression)
 - f <filename>: specify where to store the backup file
 
 2. Split the tarball 'archive.tar.bz2' into multiple files with the fixed size of 20 MBytes
@@ -20,7 +20,7 @@ $ cat archive.tar.bz2.parta* > joined.tar.bz2
 4. Extract tarball into the 'extracted' folder
 
 $ mkdir extracted
-$ tar -xvJf joined.tar.bz2 -C extracted/
+$ tar -xvjf joined.tar.bz2 -C extracted/
 
 Links:
 
