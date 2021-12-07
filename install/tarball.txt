@@ -25,3 +25,4 @@ $ tar -xvJf joined.tar.bz2 -C extracted/
 Links:
 
 [1] https://www.tecmint.com/split-large-tar-into-multiple-files-of-certain-size/
+[2] https://help.ubuntu.com/community/BackupYourSystem/TAR
