@@ -1,0 +1,3 @@
+BBB-eMMC-30788.img.gz                         - eMMC image with the minimal Linux (4.1.5, EFE)
+sd_4g_beagleboneblack_archlinuxarm.img        - uSD image with Archlinux ARM (5.8)
+bone-debian-10.3-iot-armhf-2020-04-06-4gb.img - official AM3358 Debian 10.3 IoT image (4.19)
