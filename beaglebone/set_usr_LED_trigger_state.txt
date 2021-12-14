@@ -1,5 +1,12 @@
 # Check settings for usr LEDs
 
+# LED  | trigger   | brightness
+#-------------------------------
+# usr0 | heartbeat | 0
+# usr1 | mmc0      | 0
+# usr2 | cpu0      | 255
+# usr3 | mmc1      | 0
+
 # cat /sys/class/leds/beaglebone\:green\:usr1/trigger
 none nand-disk [mmc0] mmc1 timer oneshot heartbeat backlight gpio cpu0 default-on transient flash torch
 # cat /sys/class/leds/beaglebone\:green\:usr2/trigger
@@ -11,3 +18,89 @@ none nand-disk mmc0 [mmc1] timer oneshot heartbeat backlight gpio cpu0 default-o
 
 # echo none > /sys/class/leds/beaglebone\:green\:usr1/trigger
 # echo none > /sys/class/leds/beaglebone\:green\:usr3/trigger
+
+# Trouble: Cannot change the LED trigger mode
+
+$ sudo echo 'none' > /sys/class/leds/beaglebone\:green\:usr0/trigger
+-bash: /sys/class/leds/beaglebone:green:usr0/trigger: Permission denied
+
+# Solution #1: Install 'bb-customizations' and get a member of the 'gpio' group
+
+This package installs udev rule that allows non-root users to change the user LEDs behaviour.
+
+$ sudo apt update ; sudo apt install bb-customizations
+$ sudo usermod -aG gpio <user>
+$ sudo reboot
+
+# Solution #2: Use a systemd service (Ubuntu 18.04 or Debian Buster)
+
+In newer Linux distributions 'systemd' manages the system processes. In order to change the default behaviour of the user LEDs an intended command set can be invoked by such system service. This can be achieved by a custom system service, which executes then user provided script. In older distributions a script in '/etc/rc.local' is executed after all the normal system services are started and system is switched to multi-user runlevel.
+
+Hence, an existing script used to disable all user LEDs (/opt/scripts/tools/leds.sh) will be launched by a 'rc-local' system service during startup.
+
+1. Define 'rc-local' system service
+
+It will execute '/etc/rc.local' script in the mutli-user runlevel.
+
+$ sudo nano /etc/systemd/system/rc-local.service
+
+Unit]
+Description=Run old /etc/rc.local script
+ConditionPathExists=/etc/rc.local
+
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+
+[Install]
+WantedBy=multi-user.target
+
+2. Create '/etc/rc.local' script
+
+The user commands to disable the user LEDs can be placed in this script. Instead an already existing script (leds.sh) will be called here.
+
+$ sudo nano /etc/rc.local
+
+#!/bin/bash -e
+#
+# rc.local
+#
+# Location: /etc/rc.local
+#
+# This script is executed when system is in the multiuser runlevel.
+# Make sure that the script returns 0 on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# permission.
+
+
+# Make a log entry in syslog
+logger -t rc-local Started rc-local service
+
+# Launch an user script to turn off all user LEDs
+/opt/scripts/tools/leds.sh
+
+exit 0
+
+3. Enable '/etc/rc.local' script
+
+Set the execution permission to enable the script
+
+$ sudo chmod +x /etc/rc.local
+
+4. Launch the system service
+
+Start new system service with 'systemctl' or reboot your system.
+
+$ sudo systemctl start rc-local.service
+or
+$ sudo reboot
+
+5. Check the trigger mode of user LEDs
+
+$ cat /sys/class/leds/beaglebone\:green\:usr0/trigger
