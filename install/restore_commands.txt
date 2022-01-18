@@ -1,0 +1,20 @@
+1. find files by date range (between 2018-01-01 and 2018-12-31)
+
+find . -type f -newermt '2017-12-31' -not -newermt '2018-12-31' -ls
+
+2. copy files by preserving file attributes and source directory tree
+
+rsync -avR <directory/file> path/to/destination/directory/
+
+3. verify if file is in JPEG format
+
+identify <filename>
+
+4. rename image files (#12345678 -> 12345678.jpg)
+
+rename -n 's/#(.*)/$1.jpg/' *
+
+5. create a list of files and move them into the destination folder (advanced)
+
+find . -type f -newermt '2011-12-31' -not -newermt '2012-12-31' > /tmp/2012.txt
+rsync --remove-sent-files -avR --files-from=/tmp/2012.txt ./ ../restored/2012/
