@@ -1,0 +1,96 @@
+Copy the Yocto build images to an SD card
+
+These instructions describe how to copy the Yocto images, which are built on a remote host, to an SD card [1]. The helper scripts provided by 'meta-bbb' are used for this purpose.
+
+Host system info
+
+- Linux Mint: 19.3 (64-bit)
+- kernel: 5.4
+- git: 2.17.1
+- sshfs: 2.8 with
+    - FUSE library: 2.9.7
+    - fusermount: 2.9.7
+    - FUSE kernel interface: 7.19
+
+Remote system info
+
+- Linux Mint: 20.3 (64-bit)
+- kernel: 5.4
+- git: 2.25.1
+- yocto: 3.1, branch 'dunfell'
+- installed packages (output of 'apt list --installed'):
+    - build-essential: 12.8
+    - chrpath: 0.16-2
+    - diffstat: 1.63-1
+    - gawk: 5.0.1
+    - libncurses5-dev: 6.2-0
+    - python3-distutils: 3.8.10-0
+    - texinfo: 6.7.0
+
+1. Install the 'meta-bbb' package
+
+~ $ mkdir -p yocto/bbb
+~ $ cd yocto/bbbb
+~/yocto/bbb $ git clone -b dunfell https://github.com/jumpnow/meta-bbb
+
+2. Format an SD card
+
+Find out the SD card device with 'lsblk'.
+
+~/yocto/bbb/meta-bbb/scripts $ sudo ./mk2parts.sh mmcblk0
+
+3. Mount a remote directory with Yocto build for BeagleBone Black
+
+Use option 'allow_other' to enable access by other users (sudo etc).
+
+~/yocto/bbb/meta-bbb/scripts $ mkdir -p ~/mnt/yocto/bbb
+~/yocto/bbb/meta-bbb/scripts $ sshfs <user>@<remote_host>:/absolute/path/to/yocto/bbb ~/mnt/yocto/bbb/ -C -o reconnect,auto_cache,follow_symlinks,allow_other
+
+To unmount the remote directory
+
+~/yocto/bbb/meta-bbb/scripts $ sudo umount -f /home/<me>/mnt/yocto/bbb
+
+4. Copy build images to the SD card
+
+Set an environment variable 'OETMP':
+
+~/yocto/bbb/meta-bbb/scripts $ export OETMP=~/mnt/yocto/bbb/build/tmp
+
+Prepare uEnv.txt file, which will be copied to the SD card with 'copy_boot.sh'.
+Set the 'fdtfile' variable to 'am335x-boneblack.dtb'.
+
+~/yocto/bbb/meta-bbb/scripts $ cp uEnv.txt-example uEnv.txt
+
+Copy the boot and root filesystem images (latter will take more time).
+In the example below the hostname is set to 'banhar'.
+
+~/yocto/bbb/meta-bbb/scripts $ ./copy_boot.sh mmcblk0
+~/yocto/bbb/meta-bbb/scripts $ ./copy_rootfs.sh mmcblk0 console banhar
+
+Now the SD card is ready for usage.
+
+To boot from the SD card:
+- un-plug the power supply
+- insert the SD card
+- hold the S2 switch down
+- re-plug the power supply
+- wait until the on-board LEDs blink
+
+5. Install SD image to the eMMC flash -> Failed!
+
+Make sure both 'console-image' and 'installer-image' are built.
+Make sure the remote directory with build images is mounted properly.
+
+Prepare to use meta-bbb/scripts/emmc-uEnv.txt as uEnv.txt:
+~/yocto/bbb/meta-bbb/scripts $ cp uEnv.txt uEnv.txt.bak
+~/yocto/bbb/meta-bbb/scripts $ cp emmc-uEnv.txt uEnv.txt
+
+Copy the build images with following commands:
+~/yocto/bbb/meta-bbb/scripts $ export OETMP=~/mnt/yocto/bbb/build/tmp
+~/yocto/bbb/meta-bbb/scripts $ ./copy_boot.sh mmcblk0
+~/yocto/bbb/meta-bbb/scripts $ ./copy_rootfs.sh mmcblk0 installer banhar
+~/yocto/bbb/meta-bbb/scripts $ ./copy_emmc_install.sh mmcblk0 console
+
+Source:
+
+[1] Building BeagleBone Systems with Yocto, https://jumpnowtek.com/beaglebone/BeagleBone-Systems-with-Yocto.html

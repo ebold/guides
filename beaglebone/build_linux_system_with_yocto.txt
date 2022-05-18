@@ -1,0 +1,202 @@
+Build the Linux system for BeagleBone Black with Yocto [1]
+
+1. Host system info
+
+- Linux Mint: 20.3 (64-bit)
+- kernel: 5.4
+- git: 2.25.1
+- installed packages (output of 'apt list --installed'):
+    - build-essential: 12.8
+    - chrpath: 0.16-2
+    - diffstat: 1.63-1
+    - gawk: 5.0.1
+    - libncurses5-dev: 6.2-0
+    - python3-distutils: 3.8.10-0
+    - texinfo: 6.7.0
+
+2. Target system info
+
+- Yocto: 3.1, branch 'dunfell'
+- kernel: 5.8
+- U-boot: 2020.01
+- init: sysvinit using eudev
+- Qt: 5.13.2 (no X11, no desktop, Qt GUI applications can be run using the linuxfb platform plugin)
+- Python: 3.8.2
+- gcc/g++: 9.3.0 (with associated build tools)
+- git: 2.24
+
+3. Installation of Yocto and required meta layers
+
+Installation folder is ~/yocto/.
+
+3.1. Install basic packages (they do not need modifications)
+
+~$ git clone -b dunfell git://git.yoctoproject.org/poky.git poky-dunfell
+
+~$ cd poky-dunfell
+~/poky-dunfell$ git clone -b dunfell git://git.openembedded.org/meta-openembedded
+~/poky-dunfell$ git clone -b dunfell https://github.com/meta-qt5/meta-qt5.git
+~/poky-dunfell$ git clone -b dunfell git://git.yoctoproject.org/meta-security.git
+
+3.2. Add the customized common meta-layer
+
+~/poky-dunfell$ git clone -b dunfell https://github.com/jumpnow/meta-jumpnow.git
+
+3.3. Add the custom 'meta-bbb' layer
+
+Optional: check meta-bbb/README.md for the latest commits that are tested. Check out them in case of trouble.
+
+~$ mkdir ~/bbb
+~$ cd ~/bbb
+~/bbb$ git clone -b dunfell https://github.com/jumpnow/meta-bbb
+
+The directory tree will look like as:
+    - poky-dunfell
+    - bbb/meta-bbb
+
+3.4. Enable the USB serial console driver in the kernel configuration:
+
+Edit the kernel configuration in .. by adding both lines:
+    - CONFIG_USB_SERIAL_CONSOLE=y
+    - CONFIG_USB_SERIAL_GENERIC=y
+
+4. Initialize the build directory
+
+4.1. Set up a build directory (bbb/build)
+
+~$ source poky-dunfell/oe-init-build-env bbb/build
+
+4.2. Customize the configuration files
+
+Back up existing configuration files to *.bak files.
+Overwrite the default generic configuration files with sample files provided by meta-bbb:
+
+~/bbb$ cp meta-bbb/conf/local.conf.sample build/conf/local.conf
+~/bbb$ cp meta-bbb/conf/bblayers.conf.sample build/conf/bblayers.conf
+
+4.3. Edit bblayers.conf
+
+Set the appropriate path to the meta-layer repositories by editing paths of 'BBLAYERS'.
+
+4.4. Edit local.conf
+
+Optional: set the following variables, but defaults are also fine (can be found in local.conf.bak).
+    - TMPDIR:     default value is "${TOPDIR}/tmp"
+    - DL_DIR:     default value is "${TOPDIR}/downloads"
+    - SSTATE_DIR: default value is "${TOPDIR}/sstate-cache"
+
+Change the root password 'jumpnowtek' to 'beaglebone' by replacing the line:
+    EXTRA_USERS_PARAMS = "usermod -P jumpnowtek root; "
+with
+    EXTRA_USERS_PARAMS = "usermod -P beaglebone root; "
+
+5. Build images
+
+There are custom recipes provided by meta-bbb (meta-bbb/images/*.bb):
+    - console-image.bb:   basic console developer image (inherits some base packages for common targets)
+    - qt5-image.bb:       adds Qt5 run-time libraries to 'console-image'
+    - installer-image.bb: minimal image to run from an SD card and perform an eMMC installation
+
+To build the 'console-image' run the following command:
+
+~/bbb/build$ bitbake console-image
+
+In case of occasional build errors, clean the failed package (ie., zip) and re-run the build again:
+
+~/bbb/build$ bitbake -c cleansstate zip
+~/bbb/build$ bitbake zip
+
+The image files remain in the TMPDIR until the next build.
+
+The build was broken 2 times caused by the failed 'do_fetch' tasks for following packages (re-build the target image on break):
+    - bzip2
+    - libtirpc
+    - libpcre2
+    - libssh2
+    - curl
+    - cmake-native
+
+6. Copying the binaries to an SD card (refer to 'deploy_yocto_images_to_sd_card.txt', if local host has no SD card slot)
+
+Once the build completes the bootloader, kernel and rootfilesystem image files reside in <TMPDIR>/deploy/images/beaglebone/.
+The meta-bbb provides some helper scripts to format and copy the image files to an SD card (meta-bbb/scripts):
+    - mk2parts.sh:  partition an SD card with the minimal 2 partitions
+    - copy_boot.sh: copy the bootloaders (MLO, u-boot) and uEnv.txt (if it exists) to the boot partition
+    - copy_rootfs.sh: copy the zImage Linux kernel, device tree binaries and the rest of the system to the root filesystem partition
+
+6.1. Find out an SD card device
+
+Use 'lsblk' to find out the plugged SD card
+
+6.2. Make default partitions (mk2parts.sh)
+
+Assume your SD card is recognized as device 'sdb'. Invoke following commands to format the SD card (be careful to specify the correct SD card):
+
+~$ cd ~/bbb/meta-bbb/scripts
+~/bbb/meta-bbb/scripts$ sudo ./mk2parts.sh sdb
+
+Format the SD card only once.
+
+6.3. Create a mount point for the SD card
+
+A mount point is needed to mount the SD card partitions. Assume '/media/card' is mount point for the SD card.
+
+~$ sudo mkdir /media/card
+
+6.4. Copy the boot and root filesystem images (copy_boot.sh, copy_rootfs.sh)
+
+The 'copy_boot.sh' requires to know the 'TMPDIR' directory to find the binaries and looks for an environment variable 'OETMP'.
+Therefore, export 'TMPDIR' as 'OETMP' by invoking the copy_boot.sh script:
+
+~/bbb/meta-bbb/scripts$ export OETMP=~/bbb/meta-bbb/build/tmp
+~/bbb/meta-bbb/scripts$ ./copy_boot.sh sdb
+
+The 'copy_rootfs.sh' script accepts image name (ie., console, qt5 etc) and hostname (ie., beaglebone) as arguments
+To copy 'console-image' and rename hostname as 'banhar' invoke:
+
+~/bbb/meta-bbb/scripts$ ./copy_rootfs.sh sdb console banhar
+
+If the SD card partitions were already mounted, the copy script will complain and abort (since cannot unmount partitions automatically).
+The more realistic command sequences to copy the boot and root filesystem images are:
+
+~$ sudo umount /dev/sdb1
+~$ sudo umount /dev/sdb2
+~$ export OETMP=~/bbb/meta-bbb/build/tmp
+~$ cd bbb/meta-bbb/scripts
+~/bbb/meta-bbb/scripts$ ./copy_boot.sh sdb
+~/bbb/meta-bbb/scripts$ ./copy_rootfs.sh sdb console banhar
+
+7. Boot from the SD card
+
+Hold the S2 switch (near SD card slot) down and supply power to the BeagleBone Black board.
+Once LEDs blink, release the switch back.
+
+Launch minicom to access BeagleBone Black via USB serial console:
+~/bbb/meta-bbb/scripts$ minicom -b 115200 -D /dev/ttyUSB0
+
+8. Install SD image to eMMC
+
+Make sure both 'console-image' and 'installer-image' are built.
+
+~/bbb/build$ bitbake console-image
+~/bbb/build$ bitbake installer-image
+
+Use meta-bbb/scripts/emmc-uEnv.txt as uEnv.txt (copy it). Set the 'fdtfile' variable to 'am335x-boneblack.dtb'.
+
+To copy built images to the SD card, invoke following commands:
+
+~$ sudo umount /dev/sdb1
+~$ sudo umount /dev/sdb2
+~$ export OETMP=~/bbb/meta-bbb/build/tmp
+~$ cd bbb/meta-bbb/scripts
+~/bbb/meta-bbb/scripts$ ./copy_boot.sh sdb
+~/bbb/meta-bbb/scripts$ ./copy_rootfs.sh sdb installer banhar
+~/bbb/meta-bbb/scripts$ ./copy_emmc_install.sh sdb console
+
+When you boot from the SD card, it will now automatically start the eMMC installation of the console image.
+The eMMC installation will complete when the LEDs stop blinking in the 'cylon' mode.
+Un-plug the power supply, pull the SD card and re-plug the power supply to boot from the eMMC flash.
+
+Source:
+
+[1] Building BeagleBone Systems with Yocto, https://jumpnowtek.com/beaglebone/BeagleBone-Systems-with-Yocto.html
