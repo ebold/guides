@@ -152,3 +152,68 @@ for branch in `git branch -r | grep -v HEAD`;do echo -e `git show --format="%ci 
 
 Links:
 - [Stackoverflow](http://stackoverflow.com/a/2514279)
+
+## Merge Git repositories with complete history
+
+Use cases:
+- merge multiple existing Git repositories into one new Git repository or
+- merge an existing Git repository into another existing Git repository
+
+In all cases the existing Git repos should be placed in separate subdirectories and their log history should be kept completely.
+
+Let's assume that a Git repo '*ProjectPlanet*' will be merged into a Git repo '*ProjectBlackHole*'. The real challenge is to have complete log history of '*ProjectPlanet*' after merge. Expected directory structure is depicted below.
+
+```
+ProjectBlackHole
+  |_ ProjectPlanet
+```
+
+The suggested way is to re-write all the paths of all files into the _right_ folder in the new repo before moving them. It's done in 5 steps.
+
+1. Clone all existing Git repos (to /tmp directory)
+
+```
+$ cd /tmp
+$ git clone /path/to/ProjectPlanet
+$ git clone /path/to/ProjectBlackHole
+```
+
+2. Re-write the log history of '*ProjectPlanet*'
+
+```
+$ cd /tmp/ProjectPlanet
+$ git filter-branch --index-filter \                   # re-write the index of files based on commits
+  'git ls-files -s | sed "s-\t\"*-&ProjectPlanet/-" |  # list all files and rename them to start with ProjectPlanet as the root directory
+   GIT_INDEX_FILE=$GIT_INDEX_FILE.new \                # set the current index file
+   git update-index --index-info &&                    # update indecies
+   mv "$GIT_INDEX_FILE.new" "$GIT_INDEX_FILE"' HEAD    # move index to index.new
+```
+
+Now repos are ready for merge.
+
+3. Add '*ProjectPlanet*' as new remote repo into '*ProjectBlackHole*'
+
+```
+$ cd /tmp/ProjectBlackHole
+$ git remote add --fetch ProjectPlanet ../ProjectPlanet/  # fetch a remote repo after adding it
+```
+
+No subdirectory will be created.
+
+4. Merge '*ProjectPlanet*' into '*ProjectBlackHole*'
+
+```
+$ git merge ProjectPlanet/main --allow-unrelated-histories
+$ git log --online
+$ git log ProjectPlanet/somefile        # see the commit log
+```
+
+5. Remove the remote repo
+
+```
+$ git remote remove ProjectPlanet
+```
+
+Links:
+- [by Medhat Dawoud](https://medhatdawoud.net/blog/merging-2-git-repos-with-persisting-commit-history)
+- [by Alex Harvey](https://alexharv074.github.io/puppet/2017/10/04/merge-a-git-repository-and-its-history-into-a-subdirectory-of-a-second-git-repository.html)
