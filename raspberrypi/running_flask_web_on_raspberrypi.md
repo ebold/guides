@@ -550,12 +550,24 @@ Test the renewal process by invoking:
 $ sudo certbot renew --dry-run
 ```
 
-If renewal process was successful, then it will not return any error. An error given below has been returned, but it's ignored temporarily:
+If renewal process was successful, then it will not return any error.
+
+#### If renewal fails and reports an error regarding a missing command line flag or config entry for webroot
+
+Certbot renewal fails and reports a following error (a **solution** is provided [below](#solution-for-certbot-renewal-failure)):
 ```
 Attempting to renew cert (songuuli2020.ddns.net) from /etc/letsencrypt/renewal/songuuli2020.ddns.net.conf produced an unexpected error: Missing command line flag or config entry for this setting:
 Input the webroot for songuuli2020.ddns.net:. Skipping.
 All renewal attempts failed. The following certs could not be renewed:
   /etc/letsencrypt/live/songuuli2020.ddns.net/fullchain.pem (failure)
+```
+
+#### Solution for certbot renewal failure
+
+Add a line to **/etc/letsencrypt/renewal/sudalgaa.ddns.net.conf**:
+```
+[[webroot_map]]
+songuuli2020.ddns.net = /var/lib/letsencrypt
 ```
 
 ## (optional) Set the static IP address
