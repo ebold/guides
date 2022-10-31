@@ -2,5 +2,5 @@
 
 ## 1. HiFi systems
 
-* Philips Mini HiFi System FW C220, [pdf](../books/fwc220.pdf)
+* Philips Mini HiFi System FW C220, [pdf](../books/pdf/fwc220.pdf)
 
