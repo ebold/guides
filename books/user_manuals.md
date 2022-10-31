@@ -6,4 +6,4 @@
 
 ## 2. Monitors
 
-* Dell UltraSharp U2715H, [pdf (en)](../books/pdf/dell-u2715h_users_guide_en-us.pdf), [pdf (de)](../books/pdf/dell-u2715h_users_guide_de-de.pdf)
+* Dell UltraSharp U2715H, [pdf (en)](../books/pdf/dell-u2715h_users_guide_en-us.pdf), [pdf (de)](../books/pdf/dell-u2715h_users_guide_de-de.pdf), [link](https://www.dell.com/support/home/en-us/product-support/product/dell-u2715h/docs)
