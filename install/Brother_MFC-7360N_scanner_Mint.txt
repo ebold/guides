@@ -1,5 +1,5 @@
 These instructions are tested with the Brother MFC 7360N multifunction device
-on Linux Mint 18.3, Ubuntu 18.04 (bionic) und Ubuntu 20.04 (focal).
+on Linux Mint 18.3, Linux Mint 21, Ubuntu 18.04 (bionic) und Ubuntu 20.04 (focal).
 
 1. Use an installation tool to install the LPR driver, CUPS wrapper, scanner driver and utility
 
