@@ -24,6 +24,7 @@ The latest version of the installation tool was '2.2.3-1' at the time of writing
 1.2.1. Open a terminal window and change to the directory that contains the downloaded tool.
 1.2.2. Extract the downloaded tool by invoking a command given below:
     $ gunzip linux-brprinter-installer-<version>.gz
+    $ (optional) gzip linux-brprinter-installer-<version> # to compress back
 
 1.3. Install drivers and utility by launching the installation tool
 
