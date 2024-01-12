@@ -15,7 +15,7 @@ If required please refer to [1].
 
 ## Prepare uSD card with new image
 
-1. Download uSD image [AM335x 12.2 2023-10-07 4G eMMC IoT Flasher](https://www.beagleboard.org/distros)
+1. Download uSD image **'AM335x 12.2 2023-10-07 4G eMMC IoT Flasher'** either from the [distros](https://www.beagleboard.org/distros) or [monthly snapshot](https://forum.beagleboard.org/t/debian-12-x-bookworm-monthly-snapshot-2023-10-07/36175) website.
 
 2. Verify checksum
 
@@ -73,3 +73,4 @@ username:password is [debian:temppwd]
 # Source:
 
 1. [Launch BeagleBone Black with Debian Buster 10](launch_beaglebone_with_debian_buster.md)
+2. [Debian Bookworm 12.x monthly Snapshot](https://forum.beagleboard.org/t/debian-12-x-bookworm-monthly-snapshot-2023-10-07/36175)
