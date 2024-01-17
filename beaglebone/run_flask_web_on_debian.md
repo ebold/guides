@@ -412,8 +412,124 @@ If you are behind a router (ie., FritzBox) or firewall, you will need to open an
 
 **FritzBox**: Assume that your 'BeagleBone' device is in a network behind 'FritzBox'. Port forwarding is set up in 'FritzBox' devices under port sharing: **'Internet -> Permit Access -> Port Sharing'**. Select the TCP ports 80 and 443 (HTTP-Server, HTTPS-Server) and assign them to your 'BeagleBone' device.
 
+## Secure your 'nginx' web server with a TLS/SSL certificate [5]
+
+A secure communication between your **web server** and **user's web browser** is guaranteed with a SSL/TLS (Secure Sockets Layer, Transport Layer Security) certificate. One of the CAs (Certificate Authority) that issue such certificates is [Let’s Encrypt](https://letsencrypt.org). It is a free, automated, and open source CA, which implement the ACME (Automatic Certificate Management Environment) protocol. It run for the public and provides SSL/TLS certificates freely to enable HTTPS (HTTP-Secure) on websites.
+
+Certificates issued by Let's Encrypt are **domain-validated**: they have to check that the certificate request comes from a person who actually controls the domain. They do this by sending the client a unique token, and then making a web or DNS request to retrieve a key derived from that token.
+
+### Prerequisites
+
+Ensure that you have met the following prerequisites before you proceed:
+- domain name pointing to your public IP address
+- 'nginx' web server
+- firewall configured to accept connections on ports 80 and 443
+
+### Install 'certbot' [6]
+
+Certificates issued by Let's Encrypt are trusted by all popular browsers and valid for 90 days from the issue date. Certbot is a popular open-source client for automating the process of obtaining and renewing SSL/TLS certificates and configuring web servers to use the certificates.
+
+The recommended way to install 'certbot' is the installation through 'snap':
+```
+$ sudo apt update
+$ sudo apt install snapd                        # install 'snap'
+$ sudo snap install --classic certbot           # install 'certbot'
+2024-01-17T15:29:47Z INFO Waiting for automatic snapd restart...
+certbot 2.8.0 from Certbot Project (certbot-eff✓) installed
+```
+
+With the following command prepare the 'certbot' command to be run:
+
+```
+$ sudo ln -s /snap/bin/certbot /usr/bin/certbot
+```
+
+### Confirm the nginx configuration  [7]
+
+Verify the **'server_name'** in the nginx configuration in '/etc/nginx/sites-available/myflask':
+
+```
+$ grep server_name /etc/nginx/sites-available/myflask
+```
+
+It should return 'server_name sudalgaa.ddns.net www.sudalgaa.ddns.net;', otherwise fix the domain name.
+
+### Obtain and install an SSL/TSL certificate
+
+Certbot can obtain an SSL/TSL certificate in a variety of ways through plugins. In our case, the nginx plugin will take care of reconfiguring nginx and reloading the config whenever necessary.
+
+Invoke a following command with the 'nginx' plugin and the 'sudalgaa.ddns.net' domain name:
+
+```
+$ sudo certbot --nginx -d sudalgaa.ddns.net
+
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Requesting a certificate for sudalgaa.ddns.net
+```
+
+It will prompt to enter an email address (for urgent renewal and security notices), to agree the terms of service and to accept to share your email with other partners (can be disagreed).
+
+When the requested certificate is issued successfully, 'certbot' will return following confirmation:
+
+```
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/sudalgaa.ddns.net/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/sudalgaa.ddns.net/privkey.pem
+This certificate expires on 2024-04-16.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+Deploying certificate
+Successfully deployed certificate for sudalgaa.ddns.net to /etc/nginx/sites-enabled/myflask
+Congratulations! You have successfully enabled HTTPS on https://sudalgaa.ddns.net
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
+
+Verify the secure web access just reloading your website using 'https://' and look at the security indicator. Moreover, test the web server using the [https://www.ssllabs.com/ssltest](SSL Labs Server Test): it will get an **A** grade.
+
+### Verify auto-renewal by certbot
+
+As mentioned before, the certificates issued by Let's Encrypt are valid for 90 days.
+'certbot' can handle automatic certificate renewal of the installed certificate (if it's within 30 days of expiration). By default, it is added to into systemd timers and will run twice a day.
+
+Verify all systemd timers:
+
+```
+$ sudo systemctl list-timers  # list all systemd timers
+
+
+NEXT                        LEFT        LAST                        PASSED       UNIT                   >
+Thu 2024-01-18 02:52:00 UTC 10h left    -                           -            snap.certbot.renew.time>
+```
+
+To test the renewal task, run 'certbot' renewal with the 'dry-run' option:
+
+```
+$ sudo certbot renew --dry-run
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Processing /etc/letsencrypt/renewal/sudalgaa.ddns.net.conf
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Account registered.
+Simulating renewal of an existing certificate for sudalgaa.ddns.net
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Congratulations, all simulated renewals succeeded:
+  /etc/letsencrypt/live/sudalgaa.ddns.net/fullchain.pem (success)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
+
 ## Links
 1. How to properly host Flask application with Nginx and Gunicorn, [link](https://www.e-tinkers.com/2018/08/how-to-properly-host-flask-application-with-nginx-and-guincorn/)
 2. Zugriff auf den eigenen Raspberry Pi aus dem Internet, [link](https://buyzero.de/blogs/news/zugriff-auf-den-eigenen-raspberry-pi-aus-dem-internet)
 3. Using Virtualenv to install gunicorn, [link](https://docs.gunicorn.org/en/stable/deploy.html#using-virtualenv)
 4. Systemd configuration for gunicorn, [link](https://docs.gunicorn.org/en/stable/deploy.html#systemd)
+5. Getting Started with Let's Encrypt, [link](https://letsencrypt.org/getting-started/)
+6. Certbot ACME client, [link](https://certbot.eff.org)
+7. How to Secure Nginx with Let's Encrypt on Debian 11, [link](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-debian-11)
