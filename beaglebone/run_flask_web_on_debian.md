@@ -458,7 +458,7 @@ It should return 'server_name sudalgaa.ddns.net www.sudalgaa.ddns.net;', otherwi
 
 Certbot can obtain an SSL/TSL certificate in a variety of ways through plugins. In our case, the nginx plugin will take care of reconfiguring nginx and reloading the config whenever necessary.
 
-Invoke a following command with the 'nginx' plugin and the 'sudalgaa.ddns.net' domain name:
+Invoke a following command with the 'nginx' plugin and the 'sudalgaa.ddns.net' domain name ('-d www.sudalgaa.ddns.net' is intentionally not specified, because it is not assigned in 'noip' hostname entry):
 
 ```
 $ sudo certbot --nginx -d sudalgaa.ddns.net
