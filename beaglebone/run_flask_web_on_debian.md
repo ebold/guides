@@ -490,7 +490,7 @@ If you like Certbot, please consider supporting our work by:
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ```
 
-Verify the secure web access just reloading your website using 'https://' and look at the security indicator. Moreover, test the web server using the [https://www.ssllabs.com/ssltest](SSL Labs Server Test): it will get an **A** grade.
+Verify the secure web access just reloading your website using 'https://' and look at the security indicator. Moreover, test the web server using the [SSL Labs Server Test](https://www.ssllabs.com/ssltest): it will get an **A** grade.
 
 ### Verify auto-renewal by certbot
 
