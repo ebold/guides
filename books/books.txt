@@ -24,3 +24,8 @@ System administration
 
 1. Evi Nemeth, Garth Snyder et al, Unix and Linux System Administration Handbook, 5. ed, 2018, 978-0134277554, ST 261 N433
 2. Brian Ward, How Linux Works: What Every Superuser Should Know, 3. ed, 2021, 978-1718500402
+
+# Online books
+Single board computers (BeagleBone, Raspberry Pi etc)
+
+1. BeagleBone Cookbook, https://docs.beagleboard.org/latest/books/beaglebone-cookbook/
