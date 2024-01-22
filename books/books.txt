@@ -34,3 +34,8 @@ Single board computers (BeagleBone, Raspberry Pi etc)
 Embedded systems
 
 1. Embedded Systems Engineering Roadmap, https://github.com/m3y54m/Embedded-Engineering-Roadmap
+
+# Projects (open-source)
+LoRa
+
+1. Meshtastic (LoRa mesh), https://meshtastic.org/
