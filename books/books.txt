@@ -29,3 +29,8 @@ System administration
 Single board computers (BeagleBone, Raspberry Pi etc)
 
 1. BeagleBone Cookbook, https://docs.beagleboard.org/latest/books/beaglebone-cookbook/
+
+# Online tutorials
+Embedded systems
+
+1. Embedded Systems Engineering Roadmap, https://github.com/m3y54m/Embedded-Engineering-Roadmap
