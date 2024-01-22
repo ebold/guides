@@ -93,6 +93,29 @@ $ sudo make install
 ```
 $ sudo reboot
 ```
+
+## Remove/Edit the login message [2]
+
+The contents of the files '/etc/motd', '/etc/issue' and '/etc/issue.net' are displayed everytime at login.
+In general, it's recommended to move these files elsewhere to remove the login message ('Beyond the Basics' in [2]):
+
+```
+$ sudo mv /etc/motd /etc/motd.orig
+$ sudo mv /etc/issue /etc/issue.orig
+$ sudo mv /etc/issue.net /etc/issue.net.orig
+```
+
+The latter 2 files include a line with the default login user credential (ie., debian:temppwd).
+Just make backups and remove only undesired lines from the original issue files:
+
+```
+$ sudo cp /etc/issue /etc/issue.orig
+$ sudo cp /etc/issue.net /etc/issue.net.orig
+$ sudo vi /etc/issue              # remove a line with the default user credential
+$ sudo vi /etc/issue.net
+```
+
 # Source:
 
 1. [Getting Started with BeagleBone Black](https://community.element14.com/products/devtools/single-board-computers/next-genbeaglebone/b/blog/posts/getting-started-with-beaglebone-black)
+2. [BeagleBone Cookbook](https://docs.beagleboard.org/latest/books/beaglebone-cookbook/)
