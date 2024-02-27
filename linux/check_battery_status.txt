@@ -1,0 +1,29 @@
+$ upower -i /org/freedesktop/UPower/devices/battery_BAT0
+
+  native-path:          BAT0
+  vendor:               BYD
+  model:                DELL KG7VF1A
+  serial:               192
+  power supply:         yes
+  updated:              Di 27 Feb 2024 20:11:33 CET (99 seconds ago)
+  has history:          yes
+  has statistics:       yes
+  battery
+    present:             yes
+    rechargeable:        yes
+    state:               charging
+    warning-level:       none
+    energy:              21,204 Wh
+    energy-empty:        0 Wh
+    energy-full:         57 Wh
+    energy-full-design:  60,002 Wh
+    energy-rate:         27,9224 W
+    voltage:             8,077 V
+    charge-cycles:       N/A
+    time to full:        1,3 hours
+    percentage:          37%
+    capacity:            94,9968%
+    technology:          lithium-polymer
+    icon-name:          'battery-good-charging-symbolic'
+  History (charge):
+    1709061093	37,000	charging
