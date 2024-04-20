@@ -525,6 +525,61 @@ Congratulations, all simulated renewals succeeded:
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ```
 
+## Troubleshootings
+
+### Update 'gunicorn'
+
+New updates for installed software packeges are necessary regarding security fixes or some other reasons.
+'gunicorn' is a Python module and installed via 'pip'.
+Assume that Python (eg, v3.11.2) is installed under virtual environment.
+
+Hence, updating 'gunicorn' requires at least 2 steps:
+- activate the target virtual environment
+- update the 'gunicorn' using 'pip'
+
+```
+me@BeagleBone:~$ source ~/python_venvs/flask_app/bin/activate
+
+(flask_app) me@BeagleBone:~$ pip install --upgrade gunicorn
+Looking in indexes: https://pypi.org/simple, https://www.piwheels.org/simple
+Requirement already satisfied: gunicorn in ./python_venvs/flask_app/lib/python3.11/site-packages (21.2.0)
+Collecting gunicorn
+  Downloading https://www.piwheels.org/simple/gunicorn/gunicorn-22.0.0-py3-none-any.whl (84 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 84.4/84.4 kB 717.5 kB/s eta 0:00:00
+Requirement already satisfied: packaging in ./python_venvs/flask_app/lib/python3.11/site-packages (from gunicorn) (23.2)
+Installing collected packages: gunicorn
+  Attempting uninstall: gunicorn
+    Found existing installation: gunicorn 21.2.0
+    Uninstalling gunicorn-21.2.0:
+      Successfully uninstalled gunicorn-21.2.0
+Successfully installed gunicorn-22.0.0
+```
+
+### 'git pull' not permitted
+
+Web site is normally often updated. But 'git pull' is failed with unsufficient permission:
+
+```
+$ git pull
+error: cannot open '.git/FETCH_HEAD': Permission denied
+```
+
+__Solution__: invoke the command with 'sudo':
+
+```
+$ sudo git pull
+remote: Enumerating objects: 4, done.
+remote: Counting objects: 100% (2/2), done.
+remote: Total 4 (delta 1), reused 1 (delta 1), pack-reused 2
+Unpacking objects: 100% (4/4), 2.09 KiB | 51.00 KiB/s, done.
+From https://github.com/ebold/myflask
+   c95981f..b76978a  master     -> origin/master
+Updating c95981f..b76978a
+Fast-forward
+ requirements.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
 ## Links
 1. How to properly host Flask application with Nginx and Gunicorn, [link](https://www.e-tinkers.com/2018/08/how-to-properly-host-flask-application-with-nginx-and-guincorn/)
 2. Zugriff auf den eigenen Raspberry Pi aus dem Internet, [link](https://buyzero.de/blogs/news/zugriff-auf-den-eigenen-raspberry-pi-aus-dem-internet)
