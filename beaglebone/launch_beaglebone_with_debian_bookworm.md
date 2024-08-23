@@ -20,8 +20,10 @@ If required please refer to [1].
 2. Verify checksum
 
 ```
-$ sha256sum am335x-eMMC-flasher-debian-12.2-iot-armhf-2023-10-07-4gb.img.xz
-45e90c30917e5ae34c9d7b2b655933e5b054e65890d6cf1d61a3eea8c84c6da0  am335x-eMMC-flasher-debian-12.2-iot-armhf-2023-10-07-4gb.img.xz
+# to check if file "filename" has an expected hash "checksum_hash", invoke:
+# echo "checksum_hash filename" | sha256sum --check
+
+$ echo "45e90c30917e5ae34c9d7b2b655933e5b054e65890d6cf1d61a3eea8c84c6da0  am335x-eMMC-flasher-debian-12.2-iot-armhf-2023-10-07-4gb.img.xz" | sha256sum --check
 ```
 
 3. Uncompress the image and write to the uSD card
