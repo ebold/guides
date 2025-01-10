@@ -527,6 +527,18 @@ Congratulations, all simulated renewals succeeded:
 
 ## Troubleshootings
 
+### Renew expired certificate (issued by Let's Encrypt)
+
+Assume that a client tool, Certbot, is installed. Invoke following commands to renew the certificate:
+
+```
+$ certbot --version                         # optional, check certbot installation
+$ sudo certbot certificates                 # optional, check the certificate expiration date
+$ sudo certbot --nginx -d sudalgaa.ddns.net # renew the certificate
+$ sudo systemctl list-timers                # check the renewal period
+$ sudo certbot certificates                 # optional
+```
+
 ### Update 'gunicorn'
 
 New updates for installed software packeges are necessary regarding security fixes or some other reasons.
