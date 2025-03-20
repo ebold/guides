@@ -39,6 +39,10 @@
 
 1. [Embedded Systems Engineering Roadmap](https://github.com/m3y54m/Embedded-Engineering-Roadmap)
 
+## C/C++
+
+1. [Learn c++](https://learncpp.com)
+
 # 7. Projects (open-source)
 
 ## LoRa
